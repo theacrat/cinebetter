@@ -1,0 +1,24 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "cinebetter",
+	"main": "./src/worker/entry-cf.ts",
+	"compatibility_date": "2025-10-08",
+	"compatibility_flags": ["nodejs_compat"],
+	"observability": {
+		"enabled": true
+	},
+	"upload_source_maps": true,
+	"assets": {
+		"directory": "./dist/client",
+		"not_found_handling": "single-page-application",
+		"run_worker_first": ["/*.json"]
+	},
+	"d1_databases": [
+		{
+			"binding": "IMDB_TMDB_D1",
+			"database_name": "ImdbTmdb",
+			"database_id": "f6be3f50-6556-488d-b378-2d2ce9a47bf0",
+			"migrations_dir": "./schemas/prisma/cf-migrations"
+		}
+	]
+}

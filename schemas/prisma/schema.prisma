@@ -1,0 +1,27 @@
+generator bunClient {
+  provider = "prisma-client"
+  output   = "../../src/generated/prisma"
+  runtime  = "bun"
+}
+
+generator cfClient {
+  provider = "prisma-client"
+  output   = "../../src/generated/prisma"
+  runtime  = "workerd"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model ImdbTmdb {
+  imdb String   @id
+  tmdb Int
+  type TmdbType
+}
+
+enum TmdbType {
+  M /// Movie type
+  T /// TV type
+  N /// No match type
+}

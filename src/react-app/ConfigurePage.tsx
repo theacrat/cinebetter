@@ -1,0 +1,179 @@
+import type { UserSettings } from "../shared/user-settings";
+import { encodeSettings } from "../shared/user-settings";
+import {
+	Button,
+	ButtonGroup,
+	Checkbox,
+	Flex,
+	Form,
+	Heading,
+	Link,
+	Text,
+	TextField,
+	View,
+	Well,
+} from "@adobe/react-spectrum";
+import { useState } from "react";
+
+export function ConfigurePage({
+	initialSettings,
+}: {
+	initialSettings: UserSettings;
+}) {
+	const [settings, setSettings] = useState<UserSettings>(initialSettings);
+	const [manifestUrl, setManifestUrl] = useState<string>("");
+	const [showResult, setShowResult] = useState(false);
+	const [copyButtonText, setCopyButtonText] = useState("Copy URL");
+
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+
+		const params = encodeSettings(settings);
+		const url = `${window.location.origin}${params.size ? `/${params.toString()}` : ""}/manifest.json`;
+
+		setManifestUrl(url);
+		setShowResult(true);
+	};
+
+	const copyToClipboard = async () => {
+		await navigator.clipboard.writeText(manifestUrl);
+		setCopyButtonText("Copied!");
+		setTimeout(() => {
+			setCopyButtonText("Copy URL");
+		}, 2000);
+	};
+
+	const getInstallUrl = () => {
+		return `${manifestUrl.replace(/^https?:\/\//, "stremio://")}`;
+	};
+
+	const getWebInstallUrl = () => {
+		return `https://web.stremio.com/#/addons?addon=${encodeURIComponent(manifestUrl)}`;
+	};
+
+	return (
+		<Flex
+			direction="column"
+			alignItems="center"
+			justifyContent="center"
+			minHeight="100vh"
+		>
+			<Well maxWidth="size-6000" width="90%">
+				<Flex direction="column" alignItems="center">
+					<Heading level={1}>Cinebetter</Heading>
+					<Text>Configure your metadata preferences</Text>
+				</Flex>
+
+				<Form
+					onSubmit={handleSubmit}
+					marginBottom="size-200"
+					validationBehavior="native"
+				>
+					<TextField
+						label="Language code"
+						value={settings.languageCode}
+						onChange={(v) => setSettings({ ...settings, languageCode: v })}
+						description="e.g., en-US, pt-BR, fr-FR"
+						pattern={/^[a-zA-Z]{2}-[a-zA-Z]{2}$/.source}
+						errorMessage="Please use a format like en-US. Only 2 letter segments are supported."
+					/>
+
+					<Flex direction="column" gap="size-50" marginBottom="size-200">
+						<Checkbox
+							isSelected={settings.discoverOnly}
+							onChange={(isSelected) =>
+								setSettings({ ...settings, discoverOnly: isSelected })
+							}
+						>
+							<Flex direction="column">
+								<Text>Hide catalogs from homescreen</Text>
+							</Flex>
+						</Checkbox>
+						<Checkbox
+							isSelected={settings.hideLowQuality}
+							onChange={(isSelected) =>
+								setSettings({ ...settings, hideLowQuality: isSelected })
+							}
+						>
+							<Flex direction="column">
+								<Text>Hide low quality content from search results</Text>
+								<Text UNSAFE_className="checkbox-description">
+									Attempts to hide duplicates, reaction videos, podcasts, etc.,
+									but may exclude some legitimate entries.
+								</Text>
+							</Flex>
+						</Checkbox>
+						<Checkbox
+							isSelected={settings.calendarAndNotifications}
+							onChange={(isSelected) =>
+								setSettings({
+									...settings,
+									calendarAndNotifications: isSelected,
+								})
+							}
+						>
+							<Flex direction="column">
+								<Text>Enable calendar and notifications</Text>
+								<Text UNSAFE_className="checkbox-description">
+									IMDb often has poor or incorrect data for upcoming episodes,
+									so this is not recommended unless you want to uninstall
+									Cinemeta entirely.
+								</Text>
+							</Flex>
+						</Checkbox>
+					</Flex>
+
+					<Button type="submit" variant="cta" width="100%">
+						Generate Manifest URL
+					</Button>
+				</Form>
+
+				{showResult && (
+					<View>
+						<Heading level={4} marginBottom="size-150">
+							Your Manifest URL:
+						</Heading>
+						<Well marginBottom="size-200">
+							<Text
+								UNSAFE_style={{
+									fontFamily: "monospace",
+									wordBreak: "break-all",
+								}}
+							>
+								{manifestUrl}
+							</Text>
+						</Well>
+						<ButtonGroup marginBottom="size-200">
+							<Button onPress={copyToClipboard} variant="primary">
+								{copyButtonText}
+							</Button>
+							<Button
+								onPress={() => window.open(getInstallUrl(), "_blank")}
+								variant="secondary"
+							>
+								Install in Stremio App
+							</Button>
+							<Button
+								onPress={() => window.open(getWebInstallUrl(), "_blank")}
+								variant="secondary"
+							>
+								Install in Web
+							</Button>
+						</ButtonGroup>
+						<Text>
+							After installing, you can use{" "}
+							<Link
+								href="https://cinebye.dinsden.top/"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								Cinebye
+							</Link>{" "}
+							to disable Cinemeta.
+						</Text>
+					</View>
+				)}
+			</Well>
+		</Flex>
+	);
+}

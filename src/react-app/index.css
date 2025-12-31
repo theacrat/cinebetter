@@ -1,0 +1,21 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+html,
+body {
+	height: 100%;
+	width: 100%;
+}
+
+#root {
+	height: 100%;
+	width: 100%;
+}
+
+.checkbox-description {
+	color: var(--spectrum-global-color-gray-600);
+	font-size: var(--spectrum-global-dimension-font-size-75);
+}
