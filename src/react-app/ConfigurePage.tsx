@@ -10,7 +10,6 @@ import {
 	Link,
 	Text,
 	TextField,
-	View,
 	Well,
 } from "@adobe/react-spectrum";
 import { useState } from "react";
@@ -129,11 +128,8 @@ export function ConfigurePage({
 				</Form>
 
 				{showResult && (
-					<View>
-						<Heading level={4} marginBottom="size-150">
-							Your Manifest URL:
-						</Heading>
-						<Well marginBottom="size-200">
+					<Flex direction="column" gap="size-200">
+						<Well>
 							<Text
 								UNSAFE_style={{
 									fontFamily: "monospace",
@@ -143,7 +139,7 @@ export function ConfigurePage({
 								{manifestUrl}
 							</Text>
 						</Well>
-						<ButtonGroup marginBottom="size-200">
+						<ButtonGroup>
 							<Button onPress={copyToClipboard} variant="primary">
 								{copyButtonText}
 							</Button>
@@ -171,7 +167,7 @@ export function ConfigurePage({
 							</Link>{" "}
 							to disable Cinemeta.
 						</Text>
-					</View>
+					</Flex>
 				)}
 			</Well>
 		</Flex>
