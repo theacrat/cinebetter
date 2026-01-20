@@ -62,7 +62,7 @@ function buildEpisodeVideo(
 	titleId: string,
 	episode: EpisodeEdge,
 ): Video | undefined {
-	if (!episode?.node.titleText || !episode?.node.releaseDate?.year) {
+	if (!episode?.node.titleText) {
 		return;
 	}
 
@@ -77,13 +77,15 @@ function buildEpisodeVideo(
 	return {
 		id: [titleId, season, episodeNumber].join(":"),
 		title: episode.node.titleText.text,
-		released: new Date(
-			Date.UTC(
-				episode.node.releaseDate.year,
-				(episode.node.releaseDate.month || 12) - 1,
-				episode.node.releaseDate.day || 31,
-			),
-		).toISOString(),
+		released: episode?.node?.releaseDate?.year
+			? new Date(
+					Date.UTC(
+						episode.node.releaseDate.year,
+						(episode.node.releaseDate.month || 12) - 1,
+						episode.node.releaseDate.day || 31,
+					),
+				).toISOString()
+			: undefined,
 		thumbnail: episode.node.primaryImage?.url || undefined,
 		episode: episodeNumber,
 		season: season,
@@ -240,6 +242,10 @@ export async function buildTitle(
 
 	const videos = buildVideos(title);
 
+	const hasScheduledVideos = !!(videos || []).find((v) =>
+		v.released ? new Date(v.released) > new Date() : false,
+	);
+
 	const meta: MetaItem = {
 		id: title.id,
 		type: type,
@@ -267,9 +273,10 @@ export async function buildTitle(
 				: undefined,
 		runtime: title.runtime?.displayableProperty.value.plainText || undefined,
 		videos: videos,
-		behaviorHints: !title.titleType?.canHaveEpisodes
-			? { defaultVideoId: title.id }
-			: undefined,
+		behaviorHints: {
+			defaultVideoId: !title.titleType?.canHaveEpisodes ? title.id : undefined,
+			hasScheduledVideos,
+		},
 	};
 
 	return meta;
