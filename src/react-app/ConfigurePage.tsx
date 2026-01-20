@@ -159,13 +159,13 @@ export function ConfigurePage({
 						<Text>
 							After installing, you can use{" "}
 							<Link
-								href="https://cinebye.dinsden.top/"
+								href="https://addon-manager.thea.dev/"
 								target="_blank"
 								rel="noopener noreferrer"
 							>
-								Cinebye
+								Unprotected Stremio Addon Manager
 							</Link>{" "}
-							to disable Cinemeta.
+							to uninstall Cinemeta.
 						</Text>
 					</Flex>
 				)}
