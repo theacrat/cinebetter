@@ -158,7 +158,7 @@ export function getManifestJson(settings: UserSettings): CinebetterManifest {
 							name: "Calendar",
 							extra: [
 								{
-									name: ExtraTypes.LASTVIDEOSIDS,
+									name: ExtraTypes.CALENDARVIDEOSIDS,
 									isRequired: true,
 									optionsLimit: 100,
 								},
@@ -170,7 +170,7 @@ export function getManifestJson(settings: UserSettings): CinebetterManifest {
 							name: "Notifications",
 							extra: [
 								{
-									name: ExtraTypes.CALENDARVIDEOSIDS,
+									name: ExtraTypes.LASTVIDEOSIDS,
 									isRequired: true,
 									optionsLimit: 100,
 								},
