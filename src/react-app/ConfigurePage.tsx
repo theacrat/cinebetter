@@ -102,24 +102,6 @@ export function ConfigurePage({
 								</Text>
 							</Flex>
 						</Checkbox>
-						<Checkbox
-							isSelected={settings.calendarAndNotifications}
-							onChange={(isSelected) =>
-								setSettings({
-									...settings,
-									calendarAndNotifications: isSelected,
-								})
-							}
-						>
-							<Flex direction="column">
-								<Text>Enable calendar and notifications</Text>
-								<Text UNSAFE_className="checkbox-description">
-									IMDb often has poor or incorrect data for upcoming episodes,
-									so this is not recommended unless you want to uninstall
-									Cinemeta entirely.
-								</Text>
-							</Flex>
-						</Checkbox>
 					</Flex>
 
 					<Button type="submit" variant="cta" width="100%">

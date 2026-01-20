@@ -93,7 +93,6 @@ const SETTINGS_CONFIG = {
 	),
 	hideLowQuality: boolSetting("h"),
 	discoverOnly: boolSetting("d"),
-	calendarAndNotifications: boolSetting("c"),
 };
 
 export const DEFAULT_SETTINGS: UserSettings =

@@ -146,34 +146,32 @@ export function getManifestJson(settings: UserSettings): CinebetterManifest {
 					],
 				},
 			]),
-			...(settings.calendarAndNotifications
-				? ([
+			...([
+				{
+					type: ContentTypes.SERIES,
+					id: CinebetterCatalogs.CALENDAR,
+					name: "Calendar",
+					extra: [
 						{
-							type: ContentTypes.SERIES,
-							id: CinebetterCatalogs.CALENDAR,
-							name: "Calendar",
-							extra: [
-								{
-									name: ExtraTypes.CALENDARVIDEOSIDS,
-									isRequired: true,
-									optionsLimit: 100,
-								},
-							],
+							name: ExtraTypes.CALENDARVIDEOSIDS,
+							isRequired: true,
+							optionsLimit: 100,
 						},
+					],
+				},
+				{
+					type: ContentTypes.SERIES,
+					id: CinebetterCatalogs.NOTIFICATIONS,
+					name: "Notifications",
+					extra: [
 						{
-							type: ContentTypes.SERIES,
-							id: CinebetterCatalogs.NOTIFICATIONS,
-							name: "Notifications",
-							extra: [
-								{
-									name: ExtraTypes.LASTVIDEOSIDS,
-									isRequired: true,
-									optionsLimit: 100,
-								},
-							],
+							name: ExtraTypes.LASTVIDEOSIDS,
+							isRequired: true,
+							optionsLimit: 100,
 						},
-					] as CinebetterManifest["catalogs"])
-				: []),
+					],
+				},
+			] as CinebetterManifest["catalogs"]),
 		].flat(),
 		resources: [ResourceTypes.CATALOG, ResourceTypes.META],
 		types: [ContentTypes.MOVIE, ContentTypes.SERIES],
