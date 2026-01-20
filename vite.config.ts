@@ -1,7 +1,6 @@
 import { cloudflare } from "@cloudflare/vite-plugin";
 import devServer from "@hono/vite-dev-server";
 import react from "@vitejs/plugin-react-swc";
-import path from "path";
 import macros from "unplugin-parcel-macros";
 import { defineConfig } from "vite";
 
@@ -24,14 +23,6 @@ export default defineConfig(({ mode, command }) => {
 			cors: false,
 		},
 		plugins: plugins,
-		resolve: {
-			alias: {
-				"cross-fetch": path.resolve(
-					__dirname,
-					"./src/worker/shims/fetch-shim.ts",
-				),
-			},
-		},
 		build: {
 			outDir: mode !== "cf" ? "dist/client" : undefined,
 			rollupOptions: {

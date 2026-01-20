@@ -1,32 +1,32 @@
 import { CommonEnv } from "../env";
 import { DEFAULT_SETTINGS, UserSettings } from "../shared/user-settings";
-import { ExtraType } from "./classes/StremioAddon";
-import { isStremioType } from "./classes/StremioMeta";
 import { getCatalog } from "./imdb/catalog";
 import { getFullTitle } from "./imdb/title";
 import { isCatalog, isDetailedCatalog, getManifestJson } from "./manifest";
 import { withCache } from "./utils/cache";
 import { processSettings } from "./utils/settings";
-import { getTransportUrl } from "./utils/transport-url";
 import { Context, Hono } from "hono";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import { enableArrayMethods } from "immer";
+import { ExtraTypes, isContentType } from "stremio-types";
 
 enableArrayMethods();
 
 export type AppBindings = Partial<Env & CommonEnv>;
 
-type HonoEnv = {
+export type AppEnv = {
 	Bindings: AppBindings;
 	Variables: {
-		settings: UserSettings;
+		settings?: UserSettings;
 	};
 };
 
-export type AppContext = Context<HonoEnv>;
+export type AppContext = Context<
+	AppEnv & { Variables: { settings: UserSettings } }
+>;
 
-const app = new Hono<HonoEnv>();
+const app = new Hono<AppEnv>();
 
 app.use("*", async (c, next) => {
 	return cors({
@@ -44,9 +44,9 @@ app.onError((e, c) => {
 });
 
 app.on("GET", ["/manifest.json", "/:settings/manifest.json"], (c) => {
-	const settings = processSettings(c);
+	processSettings(c);
 
-	return c.json(getManifestJson(settings));
+	return c.json(getManifestJson(c.var.settings));
 });
 
 app.on(
@@ -56,22 +56,18 @@ app.on(
 		"/:settings/meta/:type{(movie|series)}/:id",
 	],
 	(c) => {
-		const settings = processSettings(c);
+		processSettings(c);
 
 		return withCache(
 			c,
 			{
 				...DEFAULT_SETTINGS,
-				languageCode: settings.languageCode,
+				languageCode: c.var.settings.languageCode,
 			},
 			async () => {
 				const { id } = c.req.param();
 
-				const result = await getFullTitle(
-					c,
-					getTransportUrl(c, settings),
-					id.replace(/\.json$/, ""),
-				);
+				const result = await getFullTitle(c, id.replace(/\.json$/, ""));
 
 				return {
 					response: await (result ? c.json({ meta: result }) : c.notFound()),
@@ -90,7 +86,7 @@ app.on(
 		"/:settings/catalog/:type{(movie|series)}/:catalog/:query?",
 	],
 	(c) => {
-		const settings = processSettings(c);
+		processSettings(c);
 
 		const { query } = c.req.param();
 		const queryParam = new URLSearchParams(
@@ -99,16 +95,16 @@ app.on(
 
 		const cacheSettings: UserSettings = {
 			...DEFAULT_SETTINGS,
-			languageCode: settings.languageCode,
+			languageCode: c.var.settings.languageCode,
 		};
-		if (queryParam.get(ExtraType.SEARCH)) {
-			cacheSettings.hideLowQuality = settings.hideLowQuality;
+		if (queryParam.get(ExtraTypes.SEARCH)) {
+			cacheSettings.hideLowQuality = c.var.settings.hideLowQuality;
 		}
 
 		return withCache(c, cacheSettings, async () => {
 			const { type, catalog } = c.req.param();
 
-			if (!isCatalog(catalog) || !isStremioType(type)) {
+			if (!isCatalog(catalog) || !isContentType(type)) {
 				return {
 					response: await c.notFound(),
 					shouldCache: false,
@@ -116,13 +112,7 @@ app.on(
 				};
 			}
 
-			const result = await getCatalog(
-				c,
-				getTransportUrl(c, settings),
-				catalog,
-				queryParam,
-				type,
-			);
+			const result = await getCatalog(c, catalog, queryParam, type);
 
 			return {
 				response: c.json(

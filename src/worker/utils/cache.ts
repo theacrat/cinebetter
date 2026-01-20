@@ -61,7 +61,7 @@ export async function withCache(
 	const cacheRequest = new Request(normalisedUrl, c.req.raw);
 
 	const cachedResponse = await cache.match(cacheRequest);
-	if (cachedResponse && env(c).NODE_ENV !== "development") {
+	if (cachedResponse && env(c).NODE_ENV === "production") {
 		const age = cachedResponse.headers.get("Age");
 		const cacheControl = cachedResponse.headers.get("Cache-Control");
 		const maxAge = cacheControl?.match(/max-age=(\d+)/)?.[1];

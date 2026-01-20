@@ -1,8 +1,8 @@
-import { UserSettings, encodeSettings } from "../../shared/user-settings";
-import type { Context } from "hono";
+import { encodeSettings } from "../../shared/user-settings";
+import { AppContext } from "../app";
 
-export function getTransportUrl(c: Context, settings: UserSettings) {
+export function getTransportUrl(c: AppContext) {
 	const url = new URL(c.req.url);
-	url.pathname = `/${encodeSettings(settings)}/manifest.json`;
+	url.pathname = `/${encodeSettings(c.var.settings)}/manifest.json`;
 	return url.href;
 }

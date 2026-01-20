@@ -1,7 +1,12 @@
 import { UserSettings } from "../shared/user-settings";
-import type { Catalog, Manifest } from "./classes/StremioAddon";
-import { AddonType, ExtraType } from "./classes/StremioAddon";
-import { StremioType } from "./classes/StremioMeta";
+import {
+	ContentType,
+	ContentTypes,
+	ExtraTypes,
+	Manifest,
+	ManifestCatalog,
+	ResourceTypes,
+} from "stremio-types";
 
 export const CinebetterCatalogs = {
 	SEARCH: "search",
@@ -31,7 +36,7 @@ export function isDetailedCatalog(catalog: CinebetterCatalogs): boolean {
 }
 
 type CinebetterManifest = Omit<Manifest, "catalogs"> & {
-	catalogs: (Omit<Catalog, "id"> & {
+	catalogs: (ManifestCatalog & {
 		id: CinebetterCatalogs;
 	})[];
 };
@@ -78,14 +83,16 @@ export function getManifestJson(settings: UserSettings): CinebetterManifest {
 		background:
 			"https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/575px-IMDB_Logo_2016.svg.png",
 		catalogs: [
-			...[StremioType.MOVIE, StremioType.SERIES].flatMap((t) => [
+			...([ContentTypes.MOVIE, ContentTypes.SERIES] as ContentType[]).map<
+				CinebetterManifest["catalogs"]
+			>((t) => [
 				{
 					type: t,
 					id: CinebetterCatalogs.SEARCH,
 					name: "Search",
 					extra: [
 						{
-							name: ExtraType.SEARCH,
+							name: ExtraTypes.SEARCH,
 							isRequired: true,
 						},
 					],
@@ -96,14 +103,14 @@ export function getManifestJson(settings: UserSettings): CinebetterManifest {
 					name: "Popular",
 					extra: [
 						{
-							name: ExtraType.DISCOVER,
+							name: ExtraTypes.GENRE,
 							options: settings.discoverOnly
 								? IMDB_GENRES_WITH_ALL
 								: IMDB_GENRES,
 							isRequired: settings.discoverOnly,
 						},
 						{
-							name: ExtraType.SKIP,
+							name: "skip",
 						},
 					],
 				},
@@ -113,7 +120,7 @@ export function getManifestJson(settings: UserSettings): CinebetterManifest {
 					name: "New",
 					extra: [
 						{
-							name: ExtraType.DISCOVER,
+							name: ExtraTypes.GENRE,
 							options: Array.from(
 								{ length: new Date().getUTCFullYear() - 1874 + 1 },
 								(_, i) => String(1874 + i),
@@ -121,7 +128,7 @@ export function getManifestJson(settings: UserSettings): CinebetterManifest {
 							isRequired: true,
 						},
 						{
-							name: ExtraType.SKIP,
+							name: ExtraTypes.SKIP,
 						},
 					],
 				},
@@ -131,49 +138,49 @@ export function getManifestJson(settings: UserSettings): CinebetterManifest {
 					name: "Featured",
 					extra: [
 						{
-							name: ExtraType.DISCOVER,
+							name: ExtraTypes.GENRE,
 							options: settings.discoverOnly
 								? IMDB_GENRES_WITH_ALL
 								: IMDB_GENRES,
 							isRequired: settings.discoverOnly,
 						},
 						{
-							name: ExtraType.SKIP,
+							name: ExtraTypes.SKIP,
 						},
 					],
 				},
 			]),
 			...(settings.calendarAndNotifications
-				? [
+				? ([
 						{
-							type: StremioType.SERIES,
+							type: ContentTypes.SERIES,
 							id: CinebetterCatalogs.CALENDAR,
 							name: "Calendar",
 							extra: [
 								{
-									name: ExtraType.CALENDAR,
+									name: ExtraTypes.LASTVIDEOSIDS,
 									isRequired: true,
 									optionsLimit: 100,
 								},
 							],
 						},
 						{
-							type: StremioType.SERIES,
+							type: ContentTypes.SERIES,
 							id: CinebetterCatalogs.NOTIFICATIONS,
 							name: "Notifications",
 							extra: [
 								{
-									name: ExtraType.NOTIFICATION,
+									name: ExtraTypes.CALENDARVIDEOSIDS,
 									isRequired: true,
 									optionsLimit: 100,
 								},
 							],
 						},
-					]
+					] as CinebetterManifest["catalogs"])
 				: []),
-		],
-		resources: [AddonType.CATALOG, AddonType.META],
-		types: [StremioType.MOVIE, StremioType.SERIES],
+		].flat(),
+		resources: [ResourceTypes.CATALOG, ResourceTypes.META],
+		types: [ContentTypes.MOVIE, ContentTypes.SERIES],
 		idPrefixes: ["tt"],
 		behaviorHints: {
 			configurable: true,

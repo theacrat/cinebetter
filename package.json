@@ -42,6 +42,7 @@
 		"@prisma/adapter-libsql": "^7.2.0",
 		"@prisma/client": "^7.2.0",
 		"@tanstack/react-router": "^1.143.11",
+		"@types/stremio-addon-sdk": "^1.6.12",
 		"@urql/core": "^6.0.1",
 		"graphql": "^16.12.0",
 		"hono": "4.11.1",
@@ -51,7 +52,8 @@
 		"lucide-react": "^0.562.0",
 		"react": "19.2.1",
 		"react-dom": "19.2.1",
-		"tmdb-ts": "^2.0.3",
+		"stremio-types": "^0.51.1-5",
+		"tmdb-ts": "^2.1.0",
 		"unplugin-parcel-macros": "^0.1.1",
 		"yn": "^5.1.0"
 	},

@@ -7,23 +7,22 @@ import {
 	SortOrder,
 } from "../../generated/gql/graphql";
 import { AppContext } from "../app";
-import { ExtraType } from "../classes/StremioAddon";
-import { StremioMeta, StremioType } from "../classes/StremioMeta";
 import { CinebetterCatalogs } from "../manifest";
 import { createClient, ImdbClient } from "./client";
 import { AdvancedTitleSearch } from "./graphql/advanced-title-search";
 import { Query, isTitleEdge } from "./graphql/main-search";
 import { Titles } from "./graphql/titles";
 import { buildTitle, TitleIntersection } from "./transformers";
+import { MetaItem, ContentType, ContentTypes, ExtraTypes } from "stremio-types";
 
-async function search(client: ImdbClient, query: string, type: StremioType) {
+async function search(client: ImdbClient, query: string, type: ContentType) {
 	const result = await client.query(Query, {
 		search: {
 			type: [MainSearchType.Title],
 			searchTerm: query,
 			titleSearchOptions: {
 				type: [
-					type === StremioType.SERIES
+					type === ContentTypes.SERIES
 						? MainSearchTitleType.Tv
 						: MainSearchTitleType.Movie,
 				],
@@ -73,13 +72,13 @@ async function bulkTitles(
 
 function buildConstraints(
 	catalogId: CinebetterCatalogs,
-	type: StremioType,
+	type: ContentType,
 	discoverParam: string | undefined,
 ): AdvancedTitleSearchConstraints | undefined {
 	const baseConstraints: AdvancedTitleSearchConstraints = {
 		titleTypeConstraint: {
 			anyTitleTypeIds:
-				type === StremioType.SERIES
+				type === ContentTypes.SERIES
 					? ["tvSeries", "tvMiniSeries"]
 					: ["movie", "short", "tvSpecial", "tvShort"],
 		},
@@ -148,11 +147,10 @@ function getSort(
 
 export async function getCatalog(
 	c: AppContext,
-	transportUrl: string,
 	catalogId: CinebetterCatalogs,
 	params: URLSearchParams,
-	type: StremioType,
-): Promise<StremioMeta[]> {
+	type: ContentType,
+): Promise<MetaItem[]> {
 	const client = createClient(c.var.settings);
 
 	let titles: Awaited<Partial<TitleIntersection>[]>;
@@ -161,7 +159,7 @@ export async function getCatalog(
 
 	switch (catalogId) {
 		case CinebetterCatalogs.SEARCH: {
-			const searchParam = params.get(ExtraType.SEARCH);
+			const searchParam = params.get(ExtraTypes.SEARCH);
 			if (!searchParam) {
 				return [];
 			}
@@ -171,7 +169,7 @@ export async function getCatalog(
 			break;
 		}
 		case CinebetterCatalogs.CALENDAR: {
-			const calendarParam = params.get(ExtraType.CALENDAR);
+			const calendarParam = params.get(ExtraTypes.CALENDARVIDEOSIDS);
 			if (!calendarParam) {
 				return [];
 			}
@@ -179,7 +177,7 @@ export async function getCatalog(
 			break;
 		}
 		case CinebetterCatalogs.NOTIFICATIONS: {
-			const notificationsParam = params.get(ExtraType.NOTIFICATION);
+			const notificationsParam = params.get(ExtraTypes.LASTVIDEOSIDS);
 			if (!notificationsParam) {
 				return [];
 			}
@@ -189,10 +187,10 @@ export async function getCatalog(
 		case CinebetterCatalogs.POPULAR:
 		case CinebetterCatalogs.NEW:
 		case CinebetterCatalogs.FEATURED: {
-			const discoverParam = params.get(ExtraType.DISCOVER);
+			const discoverParam = params.get(ExtraTypes.GENRE);
 			const normalisedDiscoverParam =
 				!discoverParam || discoverParam === "All" ? undefined : discoverParam;
-			const skipParam = parseInt(params.get(ExtraType.SKIP) || "0");
+			const skipParam = parseInt(params.get(ExtraTypes.SKIP) || "0");
 
 			const constraints = buildConstraints(
 				catalogId,
@@ -211,7 +209,7 @@ export async function getCatalog(
 	}
 
 	const metas = await Promise.all(
-		titles.map((t) => buildTitle(c, transportUrl, t, matchTmdb, filterNoMatch)),
+		titles.map((t) => buildTitle(c, t, matchTmdb, filterNoMatch)),
 	);
 
 	return metas.filter((m) => !!m);

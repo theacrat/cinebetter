@@ -4,15 +4,16 @@ import type {
 	TitlesQuery,
 } from "../../generated/gql/graphql";
 import { AppContext } from "../app";
-import {
-	Link,
-	PosterShape,
-	StremioMeta,
-	StremioType,
-	Video,
-} from "../classes/StremioMeta";
 import { CinebetterCatalogs } from "../manifest";
 import { matchId } from "../tmdb";
+import { getTransportUrl } from "../utils/transport-url";
+import {
+	Link,
+	MetaItem,
+	ContentType,
+	Video,
+	ContentTypes,
+} from "stremio-types";
 
 export type TitleIntersection = TitleQuery["title"] &
 	TitlesQuery["titles"][number] &
@@ -79,10 +80,10 @@ function buildEpisodeVideo(
 		released: new Date(
 			Date.UTC(
 				episode.node.releaseDate.year,
-				episode.node.releaseDate.month || 11,
+				(episode.node.releaseDate.month || 12) - 1,
 				episode.node.releaseDate.day || 31,
 			),
-		),
+		).toISOString(),
 		thumbnail: episode.node.primaryImage?.url || undefined,
 		episode: episodeNumber,
 		season: season,
@@ -105,65 +106,19 @@ function buildVideos(title: Partial<TitleIntersection>): Video[] | undefined {
 		.filter((v) => !!v);
 }
 
-function formatAwards(
-	awardNominations: TitleIntersection["awardNominations"],
-): string | undefined {
-	if (!awardNominations?.edges.length) {
-		return undefined;
-	}
-
-	const wins = awardNominations.edges.filter((a) => a?.node.isWinner).length;
-	const noms = awardNominations.edges.length - wins;
-
-	const winStr = (() => {
-		if (!wins) {
-			return "";
-		} else if (wins === 1) {
-			return "1 win";
-		} else {
-			return `${wins} wins`;
-		}
-	})();
-
-	const nomStr = (() => {
-		if (!noms) {
-			return "";
-		}
-		if (noms === 1) {
-			return "1 nomination";
-		} else {
-			return `${noms} nominations`;
-		}
-	})();
-
-	if (winStr && nomStr) {
-		return `${winStr} & ${nomStr} total`;
-	}
-	return `${winStr || nomStr} total`;
-}
-
 function formatReleaseInfo(
-	type: StremioType,
+	type: ContentType,
 	releaseYear: TitleIntersection["releaseYear"],
 ): string | undefined {
 	if (!releaseYear?.year) {
 		return;
 	}
 
-	if (releaseYear.year === releaseYear.endYear || type === StremioType.MOVIE) {
+	if (releaseYear.year === releaseYear.endYear || type === ContentTypes.MOVIE) {
 		return releaseYear.year.toString();
 	}
 
 	return `${releaseYear.year}-${releaseYear.endYear || ""}`;
-}
-
-function findOfficialWebsite(
-	externalLinks: TitleIntersection["externalLinks"],
-): string | undefined {
-	return (
-		externalLinks?.edges.find((w) => w?.node.label === "Official site")?.node
-			.url || externalLinks?.edges.find((w) => w)?.node.url
-	);
 }
 
 function buildCreditLinks(
@@ -202,7 +157,7 @@ function buildCreditLinks(
 
 function buildGenreLinks(
 	genres: TitleIntersection["titleGenres"],
-	type: StremioType,
+	type: ContentType,
 	transportUrl: string,
 ): Link[] {
 	return (
@@ -222,7 +177,7 @@ function buildGenreLinks(
 
 function buildLinks(
 	title: Partial<TitleIntersection>,
-	type: StremioType,
+	type: ContentType,
 	transportUrl: string,
 ) {
 	const stremioLinks: Link[] = [
@@ -251,7 +206,6 @@ function buildLinks(
 
 export async function buildTitle(
 	c: AppContext,
-	transportUrl: string,
 	title: Partial<TitleIntersection>,
 	matchTmdb: boolean,
 	filterNoMatch: boolean,
@@ -260,9 +214,9 @@ export async function buildTitle(
 		return;
 	}
 
-	const type = title.titleType?.canHaveEpisodes
-		? StremioType.SERIES
-		: StremioType.MOVIE;
+	const type: ContentType = title.titleType?.canHaveEpisodes
+		? ContentTypes.SERIES
+		: ContentTypes.MOVIE;
 
 	const connection = getConnectionId(title);
 
@@ -286,18 +240,18 @@ export async function buildTitle(
 
 	const videos = buildVideos(title);
 
-	const meta: StremioMeta = {
+	const meta: MetaItem = {
 		id: title.id,
 		type: type,
 		name: title.titleText.text,
-		posterShape: PosterShape.POSTER,
+		posterShape: "poster",
 		background: `https://images.metahub.space/background/large/${matchedConnection ? connection : title.id}/img`,
 		logo: `https://images.metahub.space/logo/large/${matchedConnection ? connection : title.id}/img`,
 		genres: title.titleGenres?.genres.flatMap((g) => g?.genre.text || []),
 		poster: title.primaryImage?.url || undefined,
 		description: title.plot?.plotText?.plainText || undefined,
 		releaseInfo: formatReleaseInfo(type, title.releaseYear),
-		links: buildLinks(title, type, transportUrl),
+		links: buildLinks(title, type, getTransportUrl(c)),
 		imdbRating: title.ratingsSummary?.aggregateRating?.toString(),
 		released:
 			title.releaseDate?.year &&
@@ -306,21 +260,13 @@ export async function buildTitle(
 				? new Date(
 						Date.UTC(
 							title.releaseDate.year,
-							title.releaseDate.month,
+							title.releaseDate.month - 1,
 							title.releaseDate.day,
 						),
-					)
+					).toISOString()
 				: undefined,
 		runtime: title.runtime?.displayableProperty.value.plainText || undefined,
-		language: title.spokenLanguages?.spokenLanguages
-			.flatMap((l) => l?.text || [])
-			.join(", "),
-		country: title.countriesOfOrigin?.countries
-			?.flatMap((c) => c?.text || [])
-			.join(", "),
-		awards: formatAwards(title.awardNominations),
 		videos: videos,
-		website: findOfficialWebsite(title.externalLinks),
 		behaviorHints: !title.titleType?.canHaveEpisodes
 			? { defaultVideoId: title.id }
 			: undefined,

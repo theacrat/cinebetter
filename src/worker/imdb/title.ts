@@ -118,11 +118,7 @@ async function processEpisodes(
 	});
 }
 
-export async function getFullTitle(
-	c: AppContext,
-	transportUrl: string,
-	id: string,
-) {
+export async function getFullTitle(c: AppContext, id: string) {
 	const client = createClient(c.var.settings);
 	const imdbResults = await client.query(TitleFull, { id });
 
@@ -136,5 +132,5 @@ export async function getFullTitle(
 
 	const processedTitle = await processEpisodes(title, client);
 
-	return buildTitle(c, transportUrl, processedTitle, true, false);
+	return buildTitle(c, processedTitle, true, false);
 }

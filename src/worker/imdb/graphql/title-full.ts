@@ -67,27 +67,6 @@ export const TitleFull = graphql(`
 					...EpisodesConnection
 				}
 			}
-			countriesOfOrigin {
-				countries {
-					text
-				}
-			}
-			awardNominations(first: 1000) {
-				edges {
-					node {
-						isWinner
-					}
-				}
-				total
-			}
-			externalLinks(first: 10, filter: { categories: ["official"] }) {
-				edges {
-					node {
-						url
-						label
-					}
-				}
-			}
 			connections(first: 1, filter: { categories: ["follows"] }) {
 				edges {
 					node {

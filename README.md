@@ -12,7 +12,7 @@ Cinebetter replicates Cinemeta's functionality entirely, but with true IMDb data
 
 ## Setup
 
-This was built primarily as a Cloudflare Worker using a D1 database, but it also supports running on Docker with Bun and a libSQL/SQLite database. CloudFlare's free Worker plan is quite restrictive on subrequests, so Docker is recommended for most self-hosters.
+This was built primarily as a Cloudflare Worker using a D1 database, but it also supports running on Docker with Bun and a libSQL/SQLite database.
 
 ### Prerequisites
 

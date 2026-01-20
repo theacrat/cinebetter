@@ -1,7 +1,7 @@
 import { AppBindings, AppContext } from "./app";
-import { isServerless } from "./lib/runtime";
 import { getPrisma } from "./prisma";
-import { env, getRuntimeKey } from "hono/adapter";
+import { isServerless } from "./utils/runtime";
+import { env } from "hono/adapter";
 import { HTTPException } from "hono/http-exception";
 import { StatusCodes } from "http-status-codes";
 import { TMDB } from "tmdb-ts";
@@ -10,7 +10,7 @@ function getTmdb() {
 	let tmdb: TMDB;
 
 	return (c: AppContext) => {
-		const token = env<AppBindings>(c, getRuntimeKey()).TMDB_TOKEN;
+		const token = env<AppBindings>(c).TMDB_TOKEN;
 		if (!token) {
 			throw new HTTPException(StatusCodes.INTERNAL_SERVER_ERROR, {
 				message: "Error: TMDB_TOKEN is not defined in the environment.",
