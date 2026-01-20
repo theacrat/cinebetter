@@ -1,6 +1,5 @@
 import { UserSettings } from "../shared/user-settings";
 import {
-	ContentType,
 	ContentTypes,
 	ExtraTypes,
 	Manifest,
@@ -75,15 +74,12 @@ const IMDB_GENRES_WITH_ALL = ["All", ...IMDB_GENRES];
 
 export function getManifestJson(settings: UserSettings): CinebetterManifest {
 	return {
-		id: "pet.thea.cinebetter",
+		id: "dev.thea.cinebetter",
 		version: "1.0.0",
 		name: "Cinebetter",
 		description: "IMDb metadata in Stremio",
-		logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/575px-IMDB_Logo_2016.svg.png",
-		background:
-			"https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/575px-IMDB_Logo_2016.svg.png",
 		catalogs: [
-			...([ContentTypes.MOVIE, ContentTypes.SERIES] as ContentType[]).map<
+			...[ContentTypes.MOVIE, ContentTypes.SERIES].map<
 				CinebetterManifest["catalogs"]
 			>((t) => [
 				{

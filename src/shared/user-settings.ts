@@ -91,8 +91,8 @@ const SETTINGS_CONFIG = {
 		getLanguageCode,
 		(v: string | null, d: string) => getLanguageCode(v || d),
 	),
-	hideLowQuality: boolSetting("h", true),
-	discoverOnly: boolSetting("d", true),
+	hideLowQuality: boolSetting("h"),
+	discoverOnly: boolSetting("d"),
 	calendarAndNotifications: boolSetting("c"),
 };
 
