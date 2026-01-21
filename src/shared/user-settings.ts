@@ -1,5 +1,4 @@
 import { HTTPException } from "hono/http-exception";
-import yn from "yn";
 
 type SettingType = string | boolean;
 
@@ -59,16 +58,16 @@ const boolSetting = (
 	default: defaultValue,
 	encode: (v) => (v ? "1" : "0"),
 	decode: (v, d) => {
-		if (!v) {
-			return d;
+		switch (v) {
+			case null:
+				return d;
+			case "0":
+				return false;
+			case "1":
+				return true;
+			default:
+				throw new Error(`Invalid boolean value "${v}" on ${param}`);
 		}
-
-		const parsed = yn(v);
-		if (parsed === undefined) {
-			throw new Error(`Invalid boolean value "${v}" on ${param}`);
-		}
-
-		return parsed;
 	},
 });
 

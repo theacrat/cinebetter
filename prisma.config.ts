@@ -1,12 +1,11 @@
 import { listLocalDatabases } from "@prisma/adapter-d1";
 import { defineConfig } from "prisma/config";
-import yn from "yn";
 
 export default defineConfig({
 	schema: "schemas/prisma/schema.prisma",
 	datasource: {
 		url: (() => {
-			if (yn(import.meta.env.D1)) {
+			if (import.meta.env.D1 !== undefined) {
 				try {
 					const db = listLocalDatabases().pop();
 					return `file:${db}`;

@@ -10,7 +10,10 @@ const config: Config = {
 			},
 		},
 	],
-	plugins: ["@trivago/prettier-plugin-sort-imports"],
+	plugins: [
+		"@trivago/prettier-plugin-sort-imports",
+		"prettier-plugin-packagejson",
+	],
 };
 
 export default config;
