@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "cinebetter-ts",
+	"name": "cinebetter",
 	"main": "@tanstack/react-start/server-entry",
 	"compatibility_date": "2025-10-08",
 	"compatibility_flags": ["nodejs_compat"],
