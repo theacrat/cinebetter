@@ -1,7 +1,7 @@
 services:
-  cinebetter-ts:
+  cinebetter:
     build: .
-    container_name: cinebetter-ts
+    container_name: cinebetter
     restart: always
     ports:
       - '${PORT:-3000}:${PORT:-3000}'
