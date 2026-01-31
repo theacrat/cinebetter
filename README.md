@@ -35,7 +35,7 @@ cp .env.example .env
 ```bash
 # Generate GraphQL types and Prisma client
 bun codegen
-bun prisma-generate
+bun db:generate
 
 # Create and migrate database
 bun db:create
@@ -44,7 +44,7 @@ bun db:create
 bun dev
 ```
 
-Your application will be available at [http://localhost:5173](http://localhost:5173).
+Your application will be available at [http://localhost:3000](http://localhost:3000).
 
 For watch mode during development:
 
@@ -53,13 +53,22 @@ For watch mode during development:
 bun codegen:watch
 
 # Terminal 2: Watch Prisma client generation
-bun prisma-generate:watch
+bun db:generate:watch
 
 # Terminal 3: Dev server
-bun dev:bun
+bun dev
 ```
 
 ## Deployment
+
+### Docker
+
+```bash
+# Build and run with Docker Compose
+docker-compose up -d
+```
+
+The application will be available at [http://localhost:3000](http://localhost:3000).
 
 ### Cloudflare Workers
 
@@ -86,27 +95,18 @@ bun wrangler secret put TMDB_TOKEN
 5. Generate Cloudflare-specific Prisma client and run migrations:
 
 ```bash
-bun prisma-generate
-bun db:create
-bun db:migrate
-bun db:deploy
+bun db:generate:cf
+bun db:create:cf
+bun db:migrate:cf
+bun db:deploy:cf
 ```
 
 6. Deploy:
 
 ```bash
-bun run build
-bun run deploy
+bun run build:cf
+bun wrangler deploy
 ```
-
-### Docker
-
-```bash
-# Build and run with Docker Compose
-docker-compose up -d
-```
-
-The application will be available at [http://localhost:3000](http://localhost:3000).
 
 ## Database Schema
 

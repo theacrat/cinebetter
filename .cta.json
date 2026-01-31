@@ -1,0 +1,21 @@
+{
+	"projectName": "tanstack",
+	"mode": "file-router",
+	"typescript": true,
+	"packageManager": "bun",
+	"tailwind": false,
+	"addOnOptions": {
+		"prisma": {
+			"database": "sqlite"
+		}
+	},
+	"git": true,
+	"version": 1,
+	"framework": "react-cra",
+	"chosenAddOns": [
+		"eslint",
+		"nitro",
+		"start",
+		"prisma"
+	]
+}

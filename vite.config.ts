@@ -1,38 +1,71 @@
-import { cloudflare } from "@cloudflare/vite-plugin";
-import devServer from "@hono/vite-dev-server";
-import react from "@vitejs/plugin-react-swc";
-import macros from "unplugin-parcel-macros";
-import { defineConfig } from "vite";
+import type { ExternalOption } from 'rollup';
+import type { PluginOption } from 'vite';
+import process from 'node:process';
+import { fileURLToPath, URL } from 'node:url';
+import { cloudflare } from '@cloudflare/vite-plugin';
+import { devtools } from '@tanstack/devtools-vite';
+import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+import viteReact from '@vitejs/plugin-react';
+import { nitro } from 'nitro/vite';
+import { defineConfig } from 'vite';
+import viteTsConfigPaths from 'vite-tsconfig-paths';
 
-export default defineConfig(({ mode, command }) => {
-	const plugins = [macros.vite(), react()];
+const config = defineConfig(() => {
+	const plugins: PluginOption[] = [
+		devtools(),
+		cloudflare({ viteEnvironment: { name: 'ssr' } }),
+		viteTsConfigPaths({	projects: ['./tsconfig.json']	}),
+		tanstackStart(),
+		viteReact(),
+	];
 
-	if (mode === "cf") {
-		plugins.push(cloudflare());
-	} else if (command === "serve") {
-		plugins.push(
-			devServer({
-				entry: "src/worker/entry-bun.ts",
-				exclude: [/^(?!.*\.json$).*$/],
-			}),
-		);
+	const alias: Record<string, string> = {
+		'@': fileURLToPath(new URL('./src', import.meta.url)),
+	};
+	const external: ExternalOption = ['@valkey/valkey-glide'];
+
+	const unavailableShim = fileURLToPath(new URL('./src/shims/unavailable.ts', import.meta.url));
+
+	if (process.env.CF == null) {
+		plugins[1] = nitro({ output: { dir: 'dist' } });
+		external.push('@libsql/client');
+		alias['cloudflare:workers'] = unavailableShim;
+	}
+	else {
+		alias['@valkey/valkey-glide'] = unavailableShim;
 	}
 
 	return {
-		server: {
-			cors: false,
+		resolve: {
+			alias,
 		},
-		plugins: plugins,
+		plugins,
+		server: {
+			cors: true,
+		},
+		ssr: {
+			noExternal: [
+				'@adobe/react-spectrum',
+				/^@react-spectrum\/.*/,
+				/^@spectrum-icons\/.*/,
+			],
+		},
+		optimizeDeps: {
+			exclude: ['@valkey/valkey-glide'],
+		},
 		build: {
-			outDir: mode !== "cf" ? "dist/client" : undefined,
 			rollupOptions: {
+				external,
 				output: {
 					manualChunks(id) {
 						if (
-							/macro-(.*)\.css$/.test(id) ||
-							/@react-spectrum\/s2\/.*\.css$/.test(id)
+							/macro-.*\.css$/.test(id)
+							|| /@react-spectrum\/s2\/.*\.css$/.test(id)
 						) {
-							return "s2-styles";
+							return 's2-styles';
+						}
+						else {
+							return undefined;
 						}
 					},
 				},
@@ -40,3 +73,5 @@ export default defineConfig(({ mode, command }) => {
 		},
 	};
 });
+
+export default config;

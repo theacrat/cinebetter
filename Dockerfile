@@ -8,7 +8,7 @@ RUN bun install --frozen-lockfile
 
 COPY . .
 
-RUN bun run "build:bun"
+RUN bun run build
 
 FROM base AS runner
 
@@ -18,11 +18,10 @@ COPY --from=build /app/src ./src
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/schemas ./schemas
 COPY --from=build /app/prisma.config.ts ./prisma.config.ts
+COPY docker-entrypoint.sh ./
 
 ENV NODE_ENV=production
 
 EXPOSE ${PORT}
 
-VOLUME ["/app/data"]
-
-ENTRYPOINT ["sh", "-c", "bun run db:deploy:bun && exec bun src/worker/entry-bun.ts"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
