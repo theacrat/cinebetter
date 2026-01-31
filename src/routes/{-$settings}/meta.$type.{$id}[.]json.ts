@@ -1,6 +1,7 @@
 import type { ReqContext } from '@/lib/req-context';
 import type { UserSettings } from '@/lib/user-settings';
 import { createFileRoute } from '@tanstack/react-router';
+import { env } from '@/env';
 import { withCache } from '@/lib/cache';
 import { buildReqContext } from '@/lib/req-context';
 import { DEFAULT_SETTINGS } from '@/lib/user-settings';
@@ -25,15 +26,15 @@ async function metaGet(c: ReqContext, id: string) {
 		languageCode: c.settings.languageCode,
 	};
 
-	return withCache(c,	cacheSettings, async () => {
+	return withCache(c,	cacheSettings, env.CACHE_DAYS_META, async () => {
 		const result = await getFullTitle(c, (id ?? ''));
+		const isOngoing = result?.releaseInfo?.match(/^\d*-$/);
 
 		return {
 			response: result
 				? Response.json({ meta: result })
 				: new Response('Not found', { status: 404 }),
-			shouldCache: !!result,
-			ttlDays: 3,
+			ttlDays: isOngoing ? 1 : 14,
 		};
 	});
 };

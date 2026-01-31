@@ -17,6 +17,6 @@ export async function createBrowserCacheAdapter(key: string): Promise<CacheAdapt
 
 	return {
 		match: async req => cache.match(req),
-		put: async (req, res) => { await cache.put(req, res); },
+		put: async (req, res) => cache.put(req, res),
 	};
 }

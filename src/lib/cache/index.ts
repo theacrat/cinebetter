@@ -2,18 +2,15 @@ import type { ReqContext } from '../req-context';
 import type { UserSettings } from '@/lib/user-settings';
 import { env } from '@/env';
 import { encodeSettings } from '@/lib/user-settings';
+import { daysToCacheTime, getMaxAge, setHeaders } from '@/utils/cache';
 import { getWorkers } from '@/utils/runtime';
 import { createBrowserCacheAdapter } from './adapters/browser';
 import { noopCacheAdapter } from './adapters/noop';
 import { createValkeyCacheAdapter } from './adapters/valkey';
 
 export interface CacheAdapter {
-	match: (req: Request) => Promise<Response | undefined>;
-	put: (req: Request, res: Response, ttlDays: number) => Promise<void>;
-}
-
-export function daysToCacheTime(days: number) {
-	return days * 24 * 60 * 60;
+	match: (req: Request, maxCacheDays: number) => Promise<Response | undefined>;
+	put: (req: Request, res: Response, ttlDays: number, maxCacheDays: number) => Promise<void>;
 }
 
 function getCache() {
@@ -36,24 +33,23 @@ function getCache() {
 
 async function fetchMethod(
 	req: Request,
+	maxCacheDays: number,
 	fetchFn: () => Promise<{
 		response: Response;
-		shouldCache: boolean;
 		ttlDays: number;
 	}>,
 ) {
-	const { response, shouldCache, ttlDays } = await fetchFn();
+	const { response, ttlDays } = await fetchFn();
 	const cache = await getCache()();
 
 	const resClone = new Response(response.body, response);
-	resClone.headers.set(
-		'Cache-Control',
-		`public, s-maxage=${daysToCacheTime(ttlDays)}, max-age=${daysToCacheTime(ttlDays)}`,
-	);
-	resClone.headers.set('Access-Control-Allow-Origin', '*');
+	setHeaders(resClone.headers, daysToCacheTime(ttlDays));
 
-	if (shouldCache) {
-		await cache.put(req, resClone.clone(), ttlDays);
+	if (resClone.ok) {
+		const put = cache.put(req, resClone.clone(), ttlDays, maxCacheDays);
+
+		const workers = await getWorkers();
+		workers?.waitUntil(put);
 	}
 
 	return resClone;
@@ -62,9 +58,9 @@ async function fetchMethod(
 export async function withCache(
 	c: ReqContext,
 	settings: UserSettings,
+	maxCacheDays: number,
 	fetchFn: () => Promise<{
 		response: Response;
-		shouldCache: boolean;
 		ttlDays: number;
 	}>,
 ): Promise<Response> {
@@ -87,22 +83,18 @@ export async function withCache(
 	});
 
 	const cache = await getCache()();
-	const cachedResponse = await cache.match(cacheRequest);
+	const cachedResponse = await cache.match(cacheRequest, maxCacheDays);
 
 	if (cachedResponse) {
 		const age = cachedResponse.headers.get('Age');
-		const cacheControl = cachedResponse.headers.get('Cache-Control');
-		const maxAge = cacheControl?.match(/max-age=(\d+)/)?.[1];
+		const maxAge = getMaxAge(cachedResponse.headers);
 
-		if (Number.parseInt(age ?? '0') > Number.parseInt(maxAge ?? '0')) {
-			const refresh = fetchMethod(cacheRequest, fetchFn);
-
-			const workers = await getWorkers();
-			workers?.waitUntil(refresh);
+		if (Number.parseInt(age ?? '0') > maxAge) {
+			void fetchMethod(cacheRequest, maxCacheDays, fetchFn);
 		}
 
 		return cachedResponse;
 	}
 
-	return fetchMethod(cacheRequest, fetchFn);
+	return fetchMethod(cacheRequest, maxCacheDays, fetchFn);
 }

@@ -2,11 +2,12 @@ import type { ReqContext } from '@/lib/req-context';
 import type { UserSettings } from '@/lib/user-settings';
 import { createFileRoute } from '@tanstack/react-router';
 import { ExtraTypes } from 'stremio-types';
+import { env } from '@/env';
 import { withCache } from '@/lib/cache';
 import { buildReqContext } from '@/lib/req-context';
 import { DEFAULT_SETTINGS } from '@/lib/user-settings';
 import { getCatalog } from '@/services/imdb';
-import { isCatalog, isDetailedCatalog, isSupportedType } from '@/services/manifest';
+import { CinebetterCatalogs, isCatalog, isDetailedCatalog, isSupportedType } from '@/services/manifest';
 
 export const Route = createFileRoute('/{-$settings}/catalog/$type/$catalog/{-$query}.json')({
 	server: {
@@ -30,7 +31,7 @@ async function catalogGet(c: ReqContext, type: string, catalog: string, query?: 
 		...(queryParam.get(ExtraTypes.SEARCH) != null && { hideLowQuality: c.settings.hideLowQuality }),
 	};
 
-	return withCache(c, cacheSettings, async () => {
+	return withCache(c, cacheSettings, env.CACHE_DAYS_CATALOG, async () => {
 		if (!isCatalog(catalog) || !isSupportedType(type)) {
 			return {
 				response: new Response('Not found', { status: 404 }),
@@ -47,8 +48,7 @@ async function catalogGet(c: ReqContext, type: string, catalog: string, query?: 
 					? { metasDetailed: result }
 					: { metas: result },
 			),
-			shouldCache: true,
-			ttlDays: 3,
+			ttlDays: catalog === CinebetterCatalogs.SEARCH ? 1 : 7,
 		};
 	});
 };

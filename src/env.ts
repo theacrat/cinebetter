@@ -10,16 +10,18 @@ export const env = createEnv({
 		USE_CACHE: z.stringbool().default(true),
 		TMDB_TOKEN: z.string(),
 
-		CF: z.stringbool().default(false),
-
 		// Bun only
 		SQLITE_DB: z.string().optional(),
 		SQLITE_AUTH: z.string().optional(),
+
 		VALKEY_HOST: z.string().optional(),
 		VALKEY_PORT: z.coerce.number().default(6379),
 		VALKEY_USERNAME: z.string().optional(),
 		VALKEY_PASSWORD: z.string().optional(),
 		VALKEY_TLS: z.stringbool().default(false),
+
+		CACHE_DAYS_CATALOG: z.coerce.number().default(1),
+		CACHE_DAYS_META: z.coerce.number().default(7),
 	} satisfies Record<keyof AppEnv, ZodType>,
 	runtimeEnv: process.env,
 });

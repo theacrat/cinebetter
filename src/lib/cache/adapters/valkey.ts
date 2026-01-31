@@ -3,13 +3,13 @@ import type { CacheAdapter } from '..';
 import { Buffer } from 'node:buffer';
 import { promisify } from 'node:util';
 import { gunzip, gzip } from 'node:zlib';
-import { z } from 'zod';
 import { env } from '@/env';
-import { daysToCacheTime } from '..';
+import { daysToCacheTime, setHeaders } from '@/utils/cache';
 
 interface CacheData extends Record<string, Buffer> {
 	body: Buffer;
-	headers: Buffer;
+	ttl: Buffer;
+	timestamp: Buffer;
 }
 
 async function getValkey() {
@@ -21,15 +21,21 @@ async function getValkey() {
 	}
 }
 
-function parseCacheResponse(data: HashDataType) {
-	const body = data.find(v => v.field.toString() === 'body')?.value;
-	const headers = data.find(v => v.field.toString() === 'headers')?.value;
+function getBufferField(data: HashDataType, field: string): Buffer | undefined {
+	const value = data.find(v => v.field.toString() === field)?.value;
+	return value instanceof Buffer ? value : undefined;
+}
 
-	if (!(body instanceof Buffer) || !(headers instanceof Buffer)) {
+function parseCacheResponse(data: HashDataType): CacheData | undefined {
+	const body = getBufferField(data, 'body');
+	const ttl = getBufferField(data, 'ttl');
+	const timestamp = getBufferField(data, 'timestamp');
+
+	if (!body || !ttl || !timestamp) {
 		return;
 	}
 
-	return { body, headers };
+	return { body, ttl, timestamp };
 }
 
 export async function createValkeyCacheAdapter(): Promise<CacheAdapter | undefined> {
@@ -46,7 +52,7 @@ export async function createValkeyCacheAdapter(): Promise<CacheAdapter | undefin
 	}
 
 	return {
-		match: async (req) => {
+		match: async (req, maxCacheDays) => {
 			const data = await client.hgetall(req.url, { decoder: valkey.Decoder.Bytes });
 			const cacheData = parseCacheResponse(data);
 
@@ -55,27 +61,34 @@ export async function createValkeyCacheAdapter(): Promise<CacheAdapter | undefin
 			}
 
 			try {
-				const processedBody = new Uint8Array(await promisify(gunzip)(cacheData.body));
-				const processedHeaders = z.record(z.string(), z.string()).parse(JSON.parse(cacheData.headers.toString()));
+				const body = new Uint8Array(await promisify(gunzip)(cacheData.body));
+				const ttl = Number.parseInt(cacheData.ttl.toString());
+				const date = new Date(cacheData.timestamp.toString());
 
-				return new Response(processedBody, { headers: processedHeaders });
+				const headers = new Headers();
+				setHeaders(headers, ttl, date);
+
+				void client.expire(req.url, daysToCacheTime(maxCacheDays));
+
+				return new Response(body, { headers });
 			}
 			catch {
 				await client.hdel(req.url, Object.keys(cacheData));
 				return undefined;
 			}
 		},
-		put: async (req, res, ttlDays) => {
+		put: async (req, res, ttlDays, maxCacheDays) => {
 			const body = await res.arrayBuffer();
-			const headers = JSON.stringify(Object.fromEntries(res.headers));
+			const ttl = daysToCacheTime(ttlDays);
 
 			const cacheData: CacheData = {
 				body: await promisify(gzip)(body),
-				headers: Buffer.from(headers),
+				ttl: Buffer.from(ttl.toString()),
+				timestamp: Buffer.from(new Date().toISOString()),
 			};
 
 			await client.hset(req.url, cacheData);
-			await client.expire(req.url, daysToCacheTime(ttlDays));
+			await client.expire(req.url, daysToCacheTime(maxCacheDays));
 		},
 	};
 }
