@@ -29,7 +29,7 @@
 		"db:studio:cf": "bun db:cf studio",
 		"predev": "bun codegen && bun db:generate",
 		"dev": "vite dev",
-		"predev:cf": "bun codegen && bun db:generate:cf",
+		"predev:cf": "bun cf-typegen && bun codegen && bun db:generate:cf",
 		"dev:cf": "bun vite:cf dev",
 		"env": "dotenv -e .env.development -e .env",
 		"format": "bun lint",
