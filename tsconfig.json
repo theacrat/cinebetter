@@ -1,11 +1,21 @@
 {
-	"files": [],
-	"references": [
-		{ "path": "./tsconfig.app.json" },
-		{ "path": "./tsconfig.node.json" },
-		{ "path": "./tsconfig.worker.json" }
+	"extends": [
+		"@tsconfig/recommended/tsconfig.json",
+		"@tsconfig/vite-react/tsconfig.json",
+		"@tsconfig/strictest/tsconfig.json"
 	],
 	"compilerOptions": {
-		"types": ["./worker-configuration.d.ts", "@types/bun", "node"]
-	}
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["./src/*"]
+		},
+		"plugins": [
+			{
+				"name": "@0no-co/graphqlsp",
+				"schema": "./schemas/schema.graphql"
+			}
+		],
+		"types": ["vite/client", "./worker-configuration.d.ts"]
+	},
+	"include": ["./src/**/*", "./*.ts"]
 }

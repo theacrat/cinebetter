@@ -805,9 +805,7 @@ type AggregateRatingsBreakdown {
 	"""
 	Default value for demographicFilter
 	"""
-	histogram(
-		demographicFilter: DemographicFilter = { userCategory: IMDB_USERS }
-	): Histogram
+	histogram(demographicFilter: DemographicFilter = { userCategory: IMDB_USERS }): Histogram
 	"""
 	Whether the aggregate rating breakdown info display should be hidden by default
 	"""
@@ -1684,13 +1682,7 @@ type AwardsEvent {
 	instanceWithinYear, with the most recent first (e.g. 2023, 2022 edition 2,
 	2022 edition 1, ...)
 	"""
-	editions(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): EventEditionConnection
+	editions(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): EventEditionConnection
 	"""
 	Event ID
 	"""
@@ -2361,9 +2353,9 @@ input CharacterSearchConstraint {
 
 	the constraint will behave the same whether anyNameIds or allNameIds were used, meaning
 	characterSearchConstraint: { anyCharacterName: ['Jordan'], shouldLimitToCreditedNameIds: true }
-	 and
+	and
 	creditedNameConstraint: { anyNameIds: ['nm1706767', 'nm0000138', 'nm0000190'] }
-	 will return the same results
+	will return the same results
 	if anyNameIds was replaced with allNameIds, and specifying both allNameIds and anyNameIds will just combine the
 	name ids that are matched against the specified characters.
 	"""
@@ -2863,12 +2855,7 @@ type Company {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	acronyms(
-		after: ID
-		before: ID
-		first: Int
-		last: Int
-	): CompanyAcronymConnection
+	acronyms(after: ID, before: ID, first: Int, last: Int): CompanyAcronymConnection
 	"""
 	The affiliations of a given company
 
@@ -2997,10 +2984,7 @@ type Company {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-pro-name-redesign-2024
 	"""
-	experimental_branches(
-		after: ID
-		first: Int!
-	): Experimental_CompanyBranchConnection
+	experimental_branches(after: ID, first: Int!): Experimental_CompanyBranchConnection
 	"""
 	@experimental Experimental: DO NOT USE
 
@@ -3021,11 +3005,7 @@ type Company {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-pro-name-redesign-2024
 	"""
-	experimental_clients(
-		after: ID
-		first: Int!
-		sort: ClientSort
-	): Experimental_CompanyClientConnection
+	experimental_clients(after: ID, first: Int!, sort: ClientSort): Experimental_CompanyClientConnection
 	"""
 	---------------------
 	Graphlet Details:
@@ -3069,12 +3049,7 @@ type Company {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-pro-brand-networking
 	"""
-	keyStaff(
-		after: ID
-		filter: KeyStaffFilter
-		first: Int
-		sort: KeyStaffSort
-	): CompanyKeyStaffConnection
+	keyStaff(after: ID, filter: KeyStaffFilter, first: Int, sort: KeyStaffSort): CompanyKeyStaffConnection
 	"""
 	Known for clients for this company, ordered by relevance.
 	Defaults to 10 results if first is omitted.
@@ -3141,9 +3116,7 @@ type Company {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-core-tech
 	"""
-	meterRankingHistory(
-		input: CompanyMeterRankingHistoryInput
-	): CompanyMeterRankingHistory
+	meterRankingHistory(input: CompanyMeterRankingHistoryInput): CompanyMeterRankingHistory
 	"""
 	The primary image for the company.
 
@@ -4104,9 +4077,9 @@ input ContributionContext {
 	"""
 	Where to redirect to once contribution is done. Accepts variable substitutions.
 	{id}
-	 will be substituted with the item's ID you are trying to contribute to (eg: Name, Title, Image)
+	will be substituted with the item's ID you are trying to contribute to (eg: Name, Title, Image)
 	{relatedId}
-	 if provided will be substituted with the ID of the context this
+	if provided will be substituted with the ID of the context this
 	item is in, if applicable (eg: Name that Image is in the gallery of)
 	"""
 	returnUrl: URL!
@@ -4254,11 +4227,7 @@ type ContributorLeaderboards {
 	"""
 	Returns page of monthly leaderboards in reverse chronological order
 	"""
-	months(
-		after: ID
-		filter: ContributorLeaderboardsByMonthFilter
-		first: Int
-	): ContributorLeaderboardConnection!
+	months(after: ID, filter: ContributorLeaderboardsByMonthFilter, first: Int): ContributorLeaderboardConnection!
 	"""
 	Returns the leaderboard for a specific year
 	"""
@@ -4266,11 +4235,7 @@ type ContributorLeaderboards {
 	"""
 	Returns page of yearly leaderboards in reverse chronological order
 	"""
-	years(
-		after: ID
-		filter: ContributorLeaderboardsByYearFilter
-		first: Int
-	): ContributorLeaderboardConnection!
+	years(after: ID, filter: ContributorLeaderboardsByYearFilter, first: Int): ContributorLeaderboardConnection!
 }
 
 input ContributorLeaderboardsByMonthFilter {
@@ -4929,9 +4894,7 @@ type CreditConnection {
 	"""
 	Indicates whether the requested filmography data accurately reflects the onscreen cast or crew credits
 	"""
-	completenessStatus(
-		filter: CreditsCompletenessStatusFilter
-	): CreditsCompletenessStatus
+	completenessStatus(filter: CreditsCompletenessStatusFilter): CreditsCompletenessStatus
 	"""
 	Pages of credits
 	"""
@@ -5055,11 +5018,11 @@ input CreditGroupingSort {
 	1. Profession - The credit categories associated with the name's professions, in profession order
 	2. Fixed grouping order for additional and passive appearances - Credit
 	groupings that capture when a name is appearing as Self,
-	   or where they were not actively involved in the title (such as Thanks or
+	or where they were not actively involved in the title (such as Thanks or
 	Archive credits) are moved to the end of the ordering
 	3. Credit count - The number of credits a name has within the grouping, largest first
 	4. Fixed grouping order - A fixed order, presenting groupings in an order similar to that seen on movie or TV
-	   end credits.
+	end credits.
 
 	CREDIT_GROUPING_IMPORTANCE is the default.
 	"""
@@ -5108,23 +5071,23 @@ type CreditHierarchy {
 	If a client is rendering the credit F, they can determine that F is the last credit within the C subtree,
 	because:
 	* This group of credits is vended with `hierarchy` containing:
-	  `{ "levels": ["WriterFamily", "WriterTeam", "WriterTeamMember"],
-	     "levelDetails": [
-	       { "levelsKey": "WriterFamily[0].WriterTeam[0]", childCount: 1 }
+	`{ "levels": ["WriterFamily", "WriterTeam", "WriterTeamMember"],
+	"levelDetails": [
+	{ "levelsKey": "WriterFamily[0].WriterTeam[0]", childCount: 1 }
 	,
-	       { "levelsKey": "WriterFamily[0].WriterTeam[1]", childCount: 2 }
+	{ "levelsKey": "WriterFamily[0].WriterTeam[1]", childCount: 2 }
 	,
-	     ]
-	   }
+	]
+	}
 	`
 	* F is vended with `hierarchyDetail` of
-	  `[ { "level": "WriterFamily", "position": 0 }
+	`[ { "level": "WriterFamily", "position": 0 }
 	, { "level": "WriterTeam",
-	  "position": 1 }
+	"position": 1 }
 	, { "level": "WriterTeamMember", "position": 1 }
-	 ]`
+	]`
 	* A client can see that within "WriterFamily[0].WriterTeam[1]", F's WriterTeamMember-level position (2) matches the
-	  total childCount for that node in the `hierarchy` data.
+	total childCount for that node in the `hierarchy` data.
 	"""
 	levelDetails: [CreditHierarchyLevelDetail]
 	"""
@@ -5898,8 +5861,7 @@ type CustomPrimaryImage {
 """
 A date string in the ISO-8601 format: https://www.iso.org/iso-8601-date-and-time-format.html
 """
-scalar Date
-	@specifiedBy(url: "https://the-guild.dev/graphql/scalars/docs/scalars/date")
+scalar Date @specifiedBy(url: "https://the-guild.dev/graphql/scalars/docs/scalars/date")
 
 """
 A type to represent dates that cannot be represented in ISO 8601 format, e.g. missing year in 23 March.
@@ -5941,10 +5903,7 @@ input DateRange {
 A datetime string in the ISO-8601 format: https://www.iso.org/iso-8601-date-and-time-format.html
 (e.g. 2020-05-11T18:15:55Z)
 """
-scalar DateTime
-	@specifiedBy(
-		url: "https://the-guild.dev/graphql/scalars/docs/scalars/date-time-iso"
-	)
+scalar DateTime @specifiedBy(url: "https://the-guild.dev/graphql/scalars/docs/scalars/date-time-iso")
 
 input DeathDateSearchConstraint {
 	deathDateRange: DateRange!
@@ -6965,26 +6924,14 @@ type EpisodeCastConnection {
 	Sorted in increasing order by numerical seasons
 	followed by non-numerical season in alphabetical order e.g. [1, 2, 3, C, D]
 	"""
-	displayableSeasons(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): DisplayableSeasonConnection
+	displayableSeasons(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): DisplayableSeasonConnection
 	"""
 	The years of episodes in the connection
 
 	Sorted in increasing order by numerical years
 	followed by non-numerical in alphabetical order e.g. [2015, 2018, 2020, UNKNOWN]
 	"""
-	displayableYears(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): DisplayableYearConnection
+	displayableYears(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): DisplayableYearConnection
 	edges: [CreditEdge]!
 	pageInfo: PageInfo!
 	total: Int!
@@ -7021,13 +6968,7 @@ type EpisodeCreditConnection {
 	followed by non-numerical season in alphabetical order e.g. [1, 2, 3, C, D]
 	Field is null when no season information is present on the associated episodes.
 	"""
-	displayableSeasons(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): DisplayableSeasonConnection
+	displayableSeasons(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): DisplayableSeasonConnection
 	"""
 	The years of episodes in the connection
 
@@ -7035,13 +6976,7 @@ type EpisodeCreditConnection {
 	followed by non-numerical in alphabetical order e.g. [2015, 2018, 2020, UNKNOWN].
 	Field is null when no year information is present on the associated episodes.
 	"""
-	displayableYears(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): DisplayableYearConnection
+	displayableYears(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): DisplayableYearConnection
 	"""
 	Results are sorted by release date ascending.
 	"""
@@ -7085,26 +7020,14 @@ type EpisodeCrewConnection {
 	Sorted in increasing order by numerical seasons
 	followed by non-numerical season in alphabetical order e.g. [1, 2, 3, C, D]
 	"""
-	displayableSeasons(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): DisplayableSeasonConnection
+	displayableSeasons(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): DisplayableSeasonConnection
 	"""
 	The years of episodes in the connection
 
 	Sorted in increasing order by numerical years
 	followed by non-numerical in alphabetical order e.g. [2015, 2018, 2020, UNKNOWN]
 	"""
-	displayableYears(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): DisplayableYearConnection
+	displayableYears(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): DisplayableYearConnection
 	edges: [CreditEdge]!
 	"""
 	All of the jobs in this list of Crew credits
@@ -7149,9 +7072,9 @@ input EpisodeReleaseDate {
 
 type Episodes {
 	"""
-	  Displayable season as a standardized localizedDisplayableConcept
-	​
-	  Sorting is ascending by default.
+	Displayable season as a standardized localizedDisplayableConcept
+
+	Sorting is ascending by default.
 	"""
 	displayableSeasons(
 		after: ID
@@ -7313,13 +7236,7 @@ type EventEdition {
 	"""
 	A list of awards announced in an event edition e.g. 'Oscar'
 	"""
-	awards(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): AwardDetailsConnection
+	awards(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): AwardDetailsConnection
 	"""
 	The event where the event edition is happening e.g Academy Awards, USA
 	"""
@@ -7653,26 +7570,14 @@ type ExperimentalEpisodeCastConnection {
 	Sorted in increasing order by numerical seasons
 	followed by non-numerical season in alphabetical order e.g. [1, 2, 3, C, D]
 	"""
-	displayableSeasons(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): DisplayableSeasonConnection
+	displayableSeasons(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): DisplayableSeasonConnection
 	"""
 	The years of episodes in the connection
 
 	Sorted in increasing order by numerical years
 	followed by non-numerical in alphabetical order e.g. [2015, 2018, 2020, UNKNOWN]
 	"""
-	displayableYears(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): DisplayableYearConnection
+	displayableYears(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): DisplayableYearConnection
 	edges: [ExperimentalCreditEdge]!
 	pageInfo: PageInfo!
 	total: Int!
@@ -7693,26 +7598,14 @@ type ExperimentalEpisodeCrewConnection {
 	Sorted in increasing order by numerical seasons
 	followed by non-numerical season in alphabetical order e.g. [1, 2, 3, C, D]
 	"""
-	displayableSeasons(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): DisplayableSeasonConnection
+	displayableSeasons(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): DisplayableSeasonConnection
 	"""
 	The years of episodes in the connection
 
 	Sorted in increasing order by numerical years
 	followed by non-numerical in alphabetical order e.g. [2015, 2018, 2020, UNKNOWN]
 	"""
-	displayableYears(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): DisplayableYearConnection
+	displayableYears(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): DisplayableYearConnection
 	edges: [ExperimentalCreditEdge]!
 	"""
 	All of the jobs in this list of Crew credits
@@ -8256,10 +8149,7 @@ type Experimental_Resume {
 
 	@entitlement(PRO_ANY_TIER)
 	"""
-	experimental_additionalAwards(
-		after: ID
-		first: Int!
-	): Experimental_SelfVerifiedAwardConnection
+	experimental_additionalAwards(after: ID, first: Int!): Experimental_SelfVerifiedAwardConnection
 	"""
 	@experimental experimental
 	Self verified additional credits data for this name.
@@ -8286,80 +8176,56 @@ type Experimental_Resume {
 
 	@entitlement(PRO_ANY_TIER)
 	"""
-	experimental_additionalResumeInfo(
-		after: ID
-		first: Int!
-	): Experimental_AdditionalResumeInfoConnection
+	experimental_additionalResumeInfo(after: ID, first: Int!): Experimental_AdditionalResumeInfoConnection
 	"""
 	@experimental experimental
 	Self verified training history data for this name.
 
 	@entitlement(PRO_ANY_TIER)
 	"""
-	experimental_education(
-		after: ID
-		first: Int!
-	): Experimental_SelfVerifiedEducationConnection
+	experimental_education(after: ID, first: Int!): Experimental_SelfVerifiedEducationConnection
 	"""
 	@experimental experimental
 	Self verified performer profile data for this name.
 
 	@entitlement(PRO_ANY_TIER)
 	"""
-	experimental_performerProfile(
-		limit: Int
-		sections: [String]
-	): [Experimental_ResumeDataItem]
+	experimental_performerProfile(limit: Int, sections: [String]): [Experimental_ResumeDataItem]
 	"""
 	@experimental experimental
 	Self verified personal details data for this name.
 
 	@entitlement(PRO_ANY_TIER)
 	"""
-	experimental_personalDetails(
-		limit: Int
-		sections: [String]
-	): [Experimental_ResumeDataItem]
+	experimental_personalDetails(limit: Int, sections: [String]): [Experimental_ResumeDataItem]
 	"""
 	@experimental experimental
 	Self verified profession background data for this name.
 
 	@entitlement(PRO_ANY_TIER)
 	"""
-	experimental_professionalBackground(
-		limit: Int
-		sections: [String]
-	): [Experimental_ResumeDataItem]
+	experimental_professionalBackground(limit: Int, sections: [String]): [Experimental_ResumeDataItem]
 	"""
 	@experimental experimental
 	Self verified references for this name.
 
 	@entitlement(PRO_ANY_TIER)
 	"""
-	experimental_references(
-		after: ID
-		first: Int!
-	): Experimental_SelfVerifiedReferenceConnection
+	experimental_references(after: ID, first: Int!): Experimental_SelfVerifiedReferenceConnection
 	"""
 	@experimental experimental
 	Self verified skills data for this name.
 
 	@entitlement(PRO_ANY_TIER)
 	"""
-	experimental_skills(
-		limit: Int
-		sections: [String]
-	): [Experimental_ResumeDataItem]
+	experimental_skills(limit: Int, sections: [String]): [Experimental_ResumeDataItem]
 	"""
 	@experimental experimental
 	Self verified training history data for this name.
 
 	@entitlement(PRO_ANY_TIER)
 	"""
-	experimental_training(
-		after: ID
-		first: Int!
-	): Experimental_SelfVerifiedTrainingConnection
+	experimental_training(after: ID, first: Int!): Experimental_SelfVerifiedTrainingConnection
 }
 
 type Experimental_ResumeAdditionalCreditsCategories {
@@ -10450,12 +10316,7 @@ type ImageFacets {
 	"""
 	Paginatable list of galleries related to this const's images, with associated count of how many images match
 	"""
-	galleries(
-		after: ID
-		before: ID
-		first: Int
-		last: Int
-	): ImageGalleryFacetConnection
+	galleries(after: ID, before: ID, first: Int, last: Int): ImageGalleryFacetConnection
 	"""
 	Paginatable list of names related to this const's images, with associated count of how many images match
 	"""
@@ -10860,9 +10721,9 @@ type Interest {
 	Visibility status of the interest
 
 	Only when the below header values are satisfied
-	  x-imdb-internal-client == true and
-	  x-imdb-non-1p-client == false and
-	  x-imdb-client-name == 'imdb-search-indexer'
+	x-imdb-internal-client == true and
+	x-imdb-non-1p-client == false and
+	x-imdb-client-name == 'imdb-search-indexer'
 	will we return both PUBLIC and HIDDEN interests
 	Otherwise, we will only return PUBLIC interests
 
@@ -11357,13 +11218,7 @@ type Keyword {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	titles(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): KeywordTitleConnection
+	titles(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): KeywordTitleConnection
 }
 
 """
@@ -11823,9 +11678,7 @@ type List {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-core-tech
 	"""
-	listInteractionCounts(
-		timeRanges: [ListInteractionCountTimeRange]!
-	): [ListInteractionCounts]
+	listInteractionCounts(timeRanges: [ListInteractionCountTimeRange]!): [ListInteractionCounts]
 	"""
 	List Type
 
@@ -12548,14 +12401,7 @@ type MainSearchEdge {
 	position: Int!
 }
 
-union MainSearchEntity =
-	| Company
-	| Interest
-	| Keyword
-	| Name
-	| NameProfession
-	| ProfessionCategory
-	| Title
+union MainSearchEntity = Company | Interest | Keyword | Name | NameProfession | ProfessionCategory | Title
 
 type MainSearchNode {
 	entity: MainSearchEntity!
@@ -12692,10 +12538,7 @@ type ManagedCompanyKeyStaffHistory {
 	"""
 	History of changes to key staff for this company
 	"""
-	keyStaffHistory(
-		after: ID
-		first: Int
-	): ManagedCompanyKeyStaffHistoryConnection!
+	keyStaffHistory(after: ID, first: Int): ManagedCompanyKeyStaffHistoryConnection!
 }
 
 """
@@ -12763,10 +12606,7 @@ type ManagedCompanyKnownForClientHistory {
 	"""
 	History of changes to known for client for this company
 	"""
-	clientHistory(
-		after: ID
-		first: Int
-	): ManagedCompanyKnownForClientHistoryConnection!
+	clientHistory(after: ID, first: Int): ManagedCompanyKnownForClientHistoryConnection!
 }
 
 """
@@ -12904,10 +12744,7 @@ type ManagedCompanyKnownForTitleHistory {
 	"""
 	History of changes to known for title for this company
 	"""
-	titleHistory(
-		after: ID
-		first: Int
-	): ManagedCompanyKnownForTitleHistoryConnection!
+	titleHistory(after: ID, first: Int): ManagedCompanyKnownForTitleHistoryConnection!
 }
 
 """
@@ -13027,7 +12864,7 @@ type Markdown {
 		"""
 		Render a single line break with a <br> tag rather than a whitespace.  Note that double line breaks \
 		\
-		 are always
+		are always
 		rendered with <br/><br/> regardless of this option.  Default to false.
 
 		For example, let the input text be "This is\
@@ -13067,17 +12904,16 @@ type Markdown {
 
 	Ex:
 	renderedMarkdown(markdownString: "Remember [link=nm0001094] in [link=tt0062512]?") {
-	    relatedEntities {
-	        ... on Name { nameText { text }
-	 }
+	relatedEntities {
+	... on Name { nameText { text }
+	}
 
-	        ... on Title { titleText { text }
-	 }
-
-	    }
+	... on Title { titleText { text }
+	}
 
 	}
 
+	}
 
 	---------------------
 	Graphlet Details:
@@ -13488,14 +13324,7 @@ type Name {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	bios(
-		after: ID
-		before: ID
-		filter: NameBiosFilter
-		first: Int
-		jumpTo: ID
-		last: Int
-	): NameBiosConnection
+	bios(after: ID, before: ID, filter: NameBiosFilter, first: Int, jumpTo: ID, last: Int): NameBiosConnection
 	"""
 	Details of the person's date of birth.
 
@@ -13558,11 +13387,7 @@ type Name {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-pro-name-redesign-2024
 	"""
-	clients(
-		after: ID
-		first: Int!
-		sort: ClientSort
-	): NameRepresentationConnection
+	clients(after: ID, first: Int!, sort: ClientSort): NameRepresentationConnection
 	"""
 	This answers if the (name) is primarly considered as an adult actor by IMDb
 
@@ -13584,10 +13409,7 @@ type Name {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	creditCategories(
-		filter: NameCreditCategoryFilter
-		sort: NameCreditSort
-	): [NameCreditCategoryWithCredits]
+	creditCategories(filter: NameCreditCategoryFilter, sort: NameCreditSort): [NameCreditCategoryWithCredits]
 	"""
 	Vends credits for this name on titles, grouped into groupings defined by input parameter.
 
@@ -13984,7 +13806,7 @@ type Name {
 		useEntitlement: Boolean = true
 	): EpisodeCreditConnection
 	"""
-	 @experimental Experimental: DO NOT USE
+	@experimental Experimental: DO NOT USE
 
 	The names represented by this person in some capacity, like the names this
 	person is the Talent Agent for or the Publicist for.
@@ -13999,11 +13821,7 @@ type Name {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-pro-name-redesign-2024
 	"""
-	experimental_clients(
-		after: ID
-		first: Int!
-		sort: ClientSort
-	): Experimental_NameRepresentationConnection
+	experimental_clients(after: ID, first: Int!, sort: ClientSort): Experimental_NameRepresentationConnection
 	"""
 	Experimental Field: DO NOT USE. The list of credits by category for the name
 
@@ -14075,10 +13893,7 @@ type Name {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-pro-name-redesign-2024
 	"""
-	experimental_employment(
-		after: ID
-		first: Int!
-	): Experimental_EmploymentConnection
+	experimental_employment(after: ID, first: Int!): Experimental_EmploymentConnection
 	"""
 	@experimental Experimental: DO NOT USE
 
@@ -14100,10 +13915,7 @@ type Name {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-pro-name-redesign-2024
 	"""
-	experimental_representation(
-		after: ID
-		first: Int!
-	): Experimental_NameRepresentationConnection
+	experimental_representation(after: ID, first: Int!): Experimental_NameRepresentationConnection
 	"""
 	@experimental experimental
 	Resume data for a name page.
@@ -14142,9 +13954,7 @@ type Name {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	externalLinkCategories(
-		filter: ExternalLinksFilter
-	): [ExternalLinkCategoryWithExternalLinks]
+	externalLinkCategories(filter: ExternalLinksFilter): [ExternalLinkCategoryWithExternalLinks]
 	"""
 	---------------------
 	Graphlet Details:
@@ -14154,13 +13964,7 @@ type Name {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	externalLinks(
-		after: ID
-		before: ID
-		filter: ExternalLinksFilter
-		first: Int
-		last: Int
-	): ExternalLinkConnection
+	externalLinks(after: ID, before: ID, filter: ExternalLinksFilter, first: Int, last: Int): ExternalLinkConnection
 	"""
 	External links grouped by featured category
 	Throws UNAUTHENTICATED if not logged in
@@ -14286,13 +14090,7 @@ type Name {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	knownFor(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): NameKnownForConnection
+	knownFor(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): NameKnownForConnection
 	"""
 	Titles this name is known for.
 	Returns an empty list if there are no known for titles.
@@ -14383,9 +14181,7 @@ type Name {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-core-tech
 	"""
-	meterRankingHistory(
-		input: NameMeterRankingHistoryInput
-	): NameMeterRankingHistory
+	meterRankingHistory(input: NameMeterRankingHistoryInput): NameMeterRankingHistory
 	"""
 	Similar names to this name. The max similar names providable by the backend is 50.
 
@@ -14468,13 +14264,7 @@ type Name {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	otherWorks(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): NameOtherWorkConnection
+	otherWorks(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): NameOtherWorkConnection
 	"""
 	The most prestigious awards that the person has won or been nominated for
 
@@ -14573,13 +14363,7 @@ type Name {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	quotes(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): NameQuoteConnection
+	quotes(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): NameQuoteConnection
 	"""
 	Returns page view statistics of this claimed Pro name page.
 	Returns null if less than 5 people have viewed the page.
@@ -14804,13 +14588,7 @@ type Name {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	trivia(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): NameTriviaConnection
+	trivia(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): NameTriviaConnection
 	"""
 	This is Pro exclusive feature
 
@@ -14866,12 +14644,7 @@ type Name {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-community-and-video
 	"""
-	videos(
-		after: ID
-		filter: VideosQueryFilter
-		first: Int!
-		sort: VideoSort
-	): VideoConnection
+	videos(after: ID, filter: VideosQueryFilter, first: Int!, sort: VideoSort): VideoConnection
 }
 
 """
@@ -16910,10 +16683,7 @@ type NominationAward {
 	text: String!
 }
 
-union NominationAwardedEntities =
-	| AwardedCompanies
-	| AwardedNames
-	| AwardedTitles
+union NominationAwardedEntities = AwardedCompanies | AwardedNames | AwardedTitles
 
 input NominationCategoriesFilter {
 	"""
@@ -16970,10 +16740,7 @@ type NominationEvent {
 	instanceWithinYear, with the most recent first (e.g. 2023, 2022 edition 2,
 	2022 edition 1, ...)
 	"""
-	editions(
-		filter: NominationEventEditionFilter
-		limit: Int
-	): [NominationEventEdition]!
+	editions(filter: NominationEventEditionFilter, limit: Int): [NominationEventEdition]!
 	id: ID!
 	"""
 	The location of the event
@@ -17012,10 +16779,7 @@ type NominationEventEdition {
 	"""
 	A list of awards announced in an event edition e.g. 'Oscar'
 	"""
-	awards(
-		filter: NominationEventEditionAwardsFilter
-		limit: Int
-	): [NominationAward]!
+	awards(filter: NominationEventEditionAwardsFilter, limit: Int): [NominationAward]!
 	"""
 	Dates over which this event edition occurred or will occur. Field is null means the date(s) of the event are not known.
 	If event was a 1 day event endDate will be null.
@@ -17880,10 +17644,7 @@ type Poll {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-community-and-video
 	"""
-	answers(
-		first: Int
-		sort: PollAnswerSort = { by: ANSWER_INDEX, order: ASC }
-	): PollAnswersConnection!
+	answers(first: Int, sort: PollAnswerSort = { by: ANSWER_INDEX, order: ASC }): PollAnswersConnection!
 	"""
 	Author of this poll.
 
@@ -18413,7 +18174,7 @@ type PrivacyDirectives {
 	"""
 	base64 encoded json representation of the privacy directives
 	e.g. eyJkZWNpc2lvbiI6ICJBQ0NFUFRfQUxMIiwicHVycG9zZXMiOiBbMSwgMiwgM10sInZlbmRvcnMiOiBbMywgNSwgN119
-	     Decoded: {"gvlTcfString":"ABCD","avlTcfString":"EFGH",etc}
+	Decoded: {"gvlTcfString":"ABCD","avlTcfString":"EFGH",etc}
 	"""
 	directivesCookie: String!
 	"""
@@ -19080,8 +18841,8 @@ type Query {
 	If a Pro-only constraint is used, the x-imdb-customer-id header is required.
 
 	The following errors can occur if a Pro-only constraint is used:
-	  Throws UNAUTHENTICATED if not logged in
-	  Throws FORBIDDEN if customer w/o any IMDbPro subscription
+	Throws UNAUTHENTICATED if not logged in
+	Throws FORBIDDEN if customer w/o any IMDbPro subscription
 	@entitlement(PRO_ANY_TIER)
 
 	---------------------
@@ -19236,9 +18997,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-trust
 	"""
-	changeLoginSecurityRedirectURL(
-		input: ChangeLoginSecurityRedirectURLInput!
-	): ChangeLoginSecurityRedirectURLOutput
+	changeLoginSecurityRedirectURL(input: ChangeLoginSecurityRedirectURLInput!): ChangeLoginSecurityRedirectURLOutput
 	"""
 	Retrieves data associated with specific ranking chart in ordered ranking by default.
 	It supports all filters and sorts, as needed by the Chart pages.
@@ -19281,7 +19040,7 @@ type Query {
 	Get a Cinema by it's `ci` const.
 
 	Notes:
-	 - Returns null if the cinema doesn't exist.
+	- Returns null if the cinema doesn't exist.
 
 	Errors:
 	- Throws `BAD_USER_INPUT` if `id` isn't a valid `ci` const
@@ -19411,11 +19170,7 @@ type Query {
 	- Cache TTL: 0 seconds
 	- Slack Channel: #imdb-contributors-tech
 	"""
-	contributorRankings(
-		after: ID
-		filter: ContributorRankingsFilter!
-		first: Int
-	): ContributorLeaderboardRankConnection!
+	contributorRankings(after: ID, filter: ContributorRankingsFilter!, first: Int): ContributorLeaderboardRankConnection!
 	"""
 	Returns a URL to redirect to for user account creation
 	Throws GRAPHQL_VALIDATION_FAILED if an invalid association handle is provided.
@@ -19429,9 +19184,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-trust
 	"""
-	createAccountRedirectURL(
-		input: CreateAccountRedirectURLInput!
-	): CreateAccountRedirectURLOutput
+	createAccountRedirectURL(input: CreateAccountRedirectURLInput!): CreateAccountRedirectURLOutput
 	"""
 	---------------------
 	Graphlet Details:
@@ -19557,9 +19310,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-adtech-public
 	"""
-	experimental_webAds(
-		input: Experimental_WebAdsInput!
-	): Experimental_WebAdsOutput!
+	experimental_webAds(input: Experimental_WebAdsInput!): Experimental_WebAdsOutput!
 	"""
 	@experimental Get configuration information for web ads on a specific page.
 
@@ -19571,9 +19322,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-adtech-public
 	"""
-	experimental_webAdsConfig(
-		input: Experimental_WebAdsInput!
-	): Experimental_WebAdsConfigOutput
+	experimental_webAdsConfig(input: Experimental_WebAdsInput!): Experimental_WebAdsConfigOutput
 	"""
 	Retrieves Fan Picks titles. Max batch size is 100 titles.
 
@@ -19588,11 +19337,7 @@ type Query {
 	- Cache TTL: 0 seconds
 	- Slack Channel: #imdb-pwr-public
 	"""
-	fanPicksTitles(
-		after: ID
-		filter: FanPicksFilter
-		first: Int!
-	): FanPicksConnection
+	fanPicksTitles(after: ID, filter: FanPicksFilter, first: Int!): FanPicksConnection
 	"""
 	Query used to determine if a customer has access to a given feature.
 
@@ -19634,12 +19379,7 @@ type Query {
 	- Cache TTL: 0 seconds
 	- Slack Channel: #imdb-pwr-public
 	"""
-	followedEntities(
-		after: ID
-		filter: FollowFilter
-		first: Int!
-		sort: FollowSort
-	): FollowedEntitiesConnection
+	followedEntities(after: ID, filter: FollowFilter, first: Int!, sort: FollowSort): FollowedEntitiesConnection
 	"""
 	Returns a URL to redirect to for user account forgot password flow
 	Throws GRAPHQL_VALIDATION_FAILED if an invalid association handle is provided.
@@ -19652,9 +19392,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-trust
 	"""
-	forgotPasswordRedirectURL(
-		input: ForgotPasswordRedirectURLInput!
-	): ForgotPasswordRedirectURLOutput
+	forgotPasswordRedirectURL(input: ForgotPasswordRedirectURLInput!): ForgotPasswordRedirectURLOutput
 	"""
 	Retrieves the details of all exports based on the provided input. The identity
 	of the owner of the exports is determined by the x-amzn-sessionid header for
@@ -19695,9 +19433,7 @@ type Query {
 	- Cache TTL: 0 seconds
 	- Slack Channel: #imdb-sdui
 	"""
-	getLatestUIWorkflow(
-		input: GetLatestUIWorkflowInput!
-	): GetLatestUIWorkflowOutput
+	getLatestUIWorkflow(input: GetLatestUIWorkflowInput!): GetLatestUIWorkflowOutput
 	"""
 	Retrieve guild membership detail for the currently logged in customer for the
 	input companyId. Returns null if the guild membership detail record does not exist
@@ -19778,11 +19514,7 @@ type Query {
 	- Cache TTL: 600 seconds
 	- Slack Channel: #imdb-pwr-public
 	"""
-	interestCategories(
-		after: ID
-		filter: InterestCategoriesFilter
-		first: Int!
-	): InterestCategoryConnection
+	interestCategories(after: ID, filter: InterestCategoriesFilter, first: Int!): InterestCategoryConnection
 	"""
 	Metadata about an array of interests.
 
@@ -19808,9 +19540,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-trust
 	"""
-	invalidAuthProviderInterstitial(
-		input: InvalidAuthProviderInterstitialInput!
-	): InvalidAuthProviderInterstitialOutput
+	invalidAuthProviderInterstitial(input: InvalidAuthProviderInterstitialInput!): InvalidAuthProviderInterstitialOutput
 	"""
 	---------------------
 	Graphlet Details:
@@ -19955,11 +19685,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-disco
 	"""
-	mainSearch(
-		after: String
-		first: Int!
-		options: MainSearchOptions!
-	): MainSearchConnection
+	mainSearch(after: String, first: Int!, options: MainSearchOptions!): MainSearchConnection
 	"""
 	---------------------
 	Graphlet Details:
@@ -19983,10 +19709,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-core-tech
 	"""
-	nameChartRankings(
-		first: Int!
-		input: NameChartRankingsInput!
-	): NameChartRankingsConnection
+	nameChartRankings(first: Int!, input: NameChartRankingsInput!): NameChartRankingsConnection
 	"""
 	Details of a request to be a manager of a name page, identified by id and token
 
@@ -19998,10 +19721,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-pro-brand-networking
 	"""
-	nameManagingPermissionRequest(
-		id: ID!
-		token: String!
-	): NameManagingPermissionRequestResponse
+	nameManagingPermissionRequest(id: ID!, token: String!): NameManagingPermissionRequestResponse
 	"""
 	---------------------
 	Graphlet Details:
@@ -20069,11 +19789,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-coverage-tech
 	"""
-	nearbyCinemas(
-		after: ID
-		filter: NearbyCinemasFilter!
-		first: Int!
-	): CinemaConnection
+	nearbyCinemas(after: ID, filter: NearbyCinemasFilter!, first: Int!): CinemaConnection
 	"""
 	Paginated list of latest news articles.
 	Supports both Consumer and Pro news categories.
@@ -20197,11 +19913,7 @@ type Query {
 	- Cache TTL: 0 seconds
 	- Slack Channel: #imdb-pwr-public
 	"""
-	notifications(
-		after: ID
-		first: Int!
-		sort: UserNotificationsSortOrder
-	): UserNotificationConnection!
+	notifications(after: ID, first: Int!, sort: UserNotificationsSortOrder): UserNotificationConnection!
 	"""
 	Query used to fetch a video ad that plays as outstream on an IMDb app
 	Outstream video definition: Video ad not directly tied to IMDb video content (no related viconst)
@@ -20256,11 +19968,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-community-and-video
 	"""
-	pollAdminActivities(
-		after: ID
-		first: Int!
-		useEntitlement: Boolean = true
-	): PollAdminActivityConnection
+	pollAdminActivities(after: ID, first: Int!, useEntitlement: Boolean = true): PollAdminActivityConnection
 	"""
 	Returns a paginated list of the polls on IMDb. By default, the list is sorted by create time in descending order.
 	Supports page size of at most 250. Requesting a page size larger than the maximum supported will result in the maximum size being returned.
@@ -20307,11 +20015,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-disco
 	"""
-	popularTitles(
-		limit: Int!
-		paginationToken: String
-		queryFilter: PopularTitlesQueryFilter
-	): PaginatedTitles
+	popularTitles(limit: Int!, paginationToken: String, queryFilter: PopularTitlesQueryFilter): PaginatedTitles
 	"""
 	Retrieve predefined user lists. Predefined User Lists have a ListClass of CHECK_INS, FAVORITE_ACTORS,
 	FAVORITE_THEATRES, NOT_INTERESTED, RESEARCH_NOTES, SEEN, or WATCH_LIST. They are automatically created for a user,
@@ -20511,11 +20215,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-community-and-video
 	"""
-	recentVideos(
-		limit: Int!
-		paginationToken: String
-		queryFilter: RecentVideosQueryFilter
-	): PaginatedVideos
+	recentVideos(limit: Int!, paginationToken: String, queryFilter: RecentVideosQueryFilter): PaginatedVideos
 	"""
 	Retrieves RecentlyViewed items.
 	Can query views for specific site (default is Consumer site).
@@ -20538,11 +20238,7 @@ type Query {
 	- Cache TTL: 0 seconds
 	- Slack Channel: #imdb-pwr-public
 	"""
-	recentlyViewedItems(
-		after: ID
-		filter: RecentlyViewedItemsFilter
-		first: Int!
-	): RecentlyViewedConnection
+	recentlyViewedItems(after: ID, filter: RecentlyViewedItemsFilter, first: Int!): RecentlyViewedConnection
 	"""
 	Returns news articles related to names, titles, and/or companies
 	mentioned in the article.
@@ -20596,9 +20292,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-trust
 	"""
-	retrieveAccountData(
-		input: RetrieveAccountDataInput!
-	): RetrieveAccountDataOutput!
+	retrieveAccountData(input: RetrieveAccountDataInput!): RetrieveAccountDataOutput!
 	"""
 	---------------------
 	Graphlet Details:
@@ -20709,17 +20403,14 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-coverage-tech
 	"""
-	showtimesTitlesByCinemas(
-		cinemasMetadata: ShowtimesTitlesCinemasMetadata!
-		first: Int
-	): ShowtimesTitleConnection
+	showtimesTitlesByCinemas(cinemasMetadata: ShowtimesTitlesCinemasMetadata!, first: Int): ShowtimesTitleConnection
 	"""
 	Returns a single sign in option redirect URL based on association handle from login context
 	The associationHandle in the input will affect the single sign in option returned
 	Throws GRAPHQL_VALIDATION_FAILED if an invalid association handle is provided.
 	Throws GRAPHQL_VALIDATION_FAILED if returnURL is not an absolute URL or not an IMDb domain (ends with 'imdb.com') if passed
 	Throws GRAPHQL_VALIDATION_FAILED if no additionalWebAuthContext is given and associationHandle in input is an association handle
-	    used in AAP (Amazon account pool) creation/conversion i.e. 'imdb_amazon', 'imdb_pro_amazon', etc.
+	used in AAP (Amazon account pool) creation/conversion i.e. 'imdb_amazon', 'imdb_pro_amazon', etc.
 	Throws GRAPHQL_VALIDATION_FAILED if an invalid signInPrefilledEmail is provided.
 
 	---------------------
@@ -20730,9 +20421,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-trust
 	"""
-	signInOptionRedirectURL(
-		input: SignInOptionRedirectURLInput!
-	): SignInOptionRedirectURLOutput
+	signInOptionRedirectURL(input: SignInOptionRedirectURLInput!): SignInOptionRedirectURLOutput
 	"""
 	Returns sign in options redirect URLs based on association handle from login context
 	The associationHandle in the input will only affect the 1P IMDb sign in option, all of the other 3P logins will be configured with their own association handles
@@ -20747,9 +20436,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-trust
 	"""
-	signInOptionsRedirectURLs(
-		input: SignInOptionsRedirectURLsInput!
-	): SignInOptionsRedirectURLsOutput
+	signInOptionsRedirectURLs(input: SignInOptionsRedirectURLsInput!): SignInOptionsRedirectURLsOutput
 	"""
 	Names people that tend to track similar pages track
 	Throws UNAUTHENTICATED if logged out
@@ -20870,10 +20557,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-foundation-web-platform-office-hours
 	"""
-	symphonyPlacements(
-		cached: Boolean = false
-		input: GetPlacementsInput!
-	): [SymphonyPlacement]
+	symphonyPlacements(cached: Boolean = false, input: GetPlacementsInput!): [SymphonyPlacement]
 	"""
 	---------------------
 	Graphlet Details:
@@ -21034,11 +20718,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-core-tech
 	"""
-	titleChartRankings(
-		after: ID
-		first: Int!
-		input: TitleChartRankingsInput!
-	): TitleChartRankingsConnection
+	titleChartRankings(after: ID, first: Int!, input: TitleChartRankingsInput!): TitleChartRankingsConnection
 	"""
 	Titles recommended based on title genre a customer has shown interest in. Only for logged in customers.
 	Max batch size is 30 items.
@@ -21110,10 +20790,7 @@ type Query {
 	- Cache TTL: 0 seconds
 	- Slack Channel: #imdb-pwr-public
 	"""
-	titleWatchlistRecommendations(
-		after: ID
-		first: Int!
-	): TitleWatchlistRecommendationConnection
+	titleWatchlistRecommendations(after: ID, first: Int!): TitleWatchlistRecommendationConnection
 	"""
 	Output will be in the same order as input, including remapped (returned as
 	mapped id) and non-existent consts (returned with null fields)
@@ -21139,11 +20816,7 @@ type Query {
 	- Cache TTL: 3600 seconds
 	- Slack Channel: #imdb-coverage-tech
 	"""
-	topGrossingReleases(
-		after: ID
-		filter: TopGrossingReleasesFilter!
-		first: Int!
-	): TopGrossingReleasesConnection
+	topGrossingReleases(after: ID, filter: TopGrossingReleasesFilter!, first: Int!): TopGrossingReleasesConnection
 	"""
 	Returns a collection of top Lists
 	first can have a maximum value of <LIMIT>
@@ -21156,11 +20829,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-core-tech
 	"""
-	topListsForItem(
-		first: Int!
-		itemId: String!
-		topListType: TopListType!
-	): ListCollectionConnection!
+	topListsForItem(first: Int!, itemId: String!, topListType: TopListType!): ListCollectionConnection!
 	"""
 	The most popular names, sorted by StarMeter.
 	Max page size supported is 250.
@@ -21186,11 +20855,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-disco
 	"""
-	topMeterTitles(
-		after: String
-		filter: TopMeterTitlesFilter
-		first: Int!
-	): TitleSearchConnection
+	topMeterTitles(after: String, filter: TopMeterTitlesFilter, first: Int!): TitleSearchConnection
 	"""
 	Prefer titleRecommendations, which includes recommendation explanations
 
@@ -21212,11 +20877,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-core-tech
 	"""
-	topTrendingNames(
-		after: ID
-		first: Int!
-		input: TopTrendingInput!
-	): TrendingNameConnection
+	topTrendingNames(after: ID, first: Int!, input: TopTrendingInput!): TrendingNameConnection
 	"""
 	---------------------
 	Graphlet Details:
@@ -21226,11 +20887,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-core-tech
 	"""
-	topTrendingSetsPredefined(
-		after: ID
-		first: Int!
-		input: TopTrendingSetsPredefinedInput!
-	): TrendingTitleConnection
+	topTrendingSetsPredefined(after: ID, first: Int!, input: TopTrendingSetsPredefinedInput!): TrendingTitleConnection
 	"""
 	---------------------
 	Graphlet Details:
@@ -21240,11 +20897,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-core-tech
 	"""
-	topTrendingTitles(
-		after: ID
-		first: Int!
-		input: TopTrendingInput!
-	): TrendingTitleConnection
+	topTrendingTitles(after: ID, first: Int!, input: TopTrendingInput!): TrendingTitleConnection
 	"""
 	---------------------
 	Graphlet Details:
@@ -21254,11 +20907,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-core-tech
 	"""
-	topTrendingVideos(
-		after: ID
-		first: Int!
-		input: TopTrendingInput!
-	): TrendingVideoConnection
+	topTrendingVideos(after: ID, first: Int!, input: TopTrendingInput!): TrendingVideoConnection
 	"""
 	The requesting user's tracked names
 	Throws UNAUTHENTICATED if logged out
@@ -21434,16 +21083,14 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-trust
 	"""
-	userLinkedAuthProviderStatuses(
-		input: UserLinkedAuthProviderStatusesInput
-	): UserLinkedAuthProviderStatusesOutput
+	userLinkedAuthProviderStatuses(input: UserLinkedAuthProviderStatusesInput): UserLinkedAuthProviderStatusesOutput
 	"""
 	Returns a filtered and sorted list of lists for a user
 
 	There are two behaviors
-	  1. authenticated user - retrun private and public lists
-	  2. listOwnerUserId - return public lists owned by the user
-	  Note: listOwnerUserId takes precendence over the authenticated user
+	1. authenticated user - retrun private and public lists
+	2. listOwnerUserId - return public lists owned by the user
+	Note: listOwnerUserId takes precendence over the authenticated user
 
 	This query currently uses non-cached endpoint as IMDbSearchGraphlet does not support caching for List now.
 	This query is designed for search scenarios, leveraging the search index to deliver eventual consistency while
@@ -21537,11 +21184,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-community-and-video
 	"""
-	userReviews(
-		after: String
-		first: Int
-		input: UserReviewsInput
-	): ReviewsConnection!
+	userReviews(after: String, first: Int, input: UserReviewsInput): ReviewsConnection!
 	"""
 	Returns the list of polls a customer has voted on, from latest to earliest.
 
@@ -21567,11 +21210,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-community-and-video
 	"""
-	userWatchedTitles(
-		after: ID
-		first: Int!
-		input: UserWatchedTitlesInput
-	): WatchedTitlesConnection!
+	userWatchedTitles(after: ID, first: Int!, input: UserWatchedTitlesInput): WatchedTitlesConnection!
 	"""
 	Information about a vanity URL
 
@@ -21636,11 +21275,7 @@ type Query {
 	- Cache TTL: 0 seconds
 	- Slack Channel: #imdb-pwr-public
 	"""
-	videoRecommendations(
-		after: ID
-		context: VideoRecommendationsContext!
-		first: Int!
-	): VideoRecommendationsConnection
+	videoRecommendations(after: ID, context: VideoRecommendationsContext!, first: Int!): VideoRecommendationsConnection
 	"""
 	Retrieves Videos for all given video Ids. Maximum batch size is 100 videos
 
@@ -21665,11 +21300,7 @@ type Query {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-coverage-tech
 	"""
-	watchProviders(
-		after: ID
-		filter: WatchProvidersQueryFilter
-		first: Int!
-	): WatchProviderConnection
+	watchProviders(after: ID, filter: WatchProvidersQueryFilter, first: Int!): WatchProviderConnection
 	"""
 	Query used to fetch display ads for a specific web page.
 	Returns ad slots and their creative info for the requested slots.
@@ -22307,9 +21938,7 @@ type Resume {
 	"""
 	Self verified additional credits data for this name.
 	"""
-	additionalCreditCategories(
-		input: AdditionalCreditCategoriesInput
-	): ResumeAdditionalCreditsCategories
+	additionalCreditCategories(input: AdditionalCreditCategoriesInput): ResumeAdditionalCreditsCategories
 	"""
 	Self verified additional resume sections for this name.
 	"""
@@ -23197,9 +22826,7 @@ type SelfVerifiedNameData {
 	Throws UNAUTHENTICATED if not logged in
 	@entitlement(PRO_ANY_TIER)
 	"""
-	creditTypes(
-		filter: SelfVerifiedNameCreditTypeFilter
-	): [SelfVerifiedNameCreditTypeWithCredits]
+	creditTypes(filter: SelfVerifiedNameCreditTypeFilter): [SelfVerifiedNameCreditTypeWithCredits]
 	"""
 	The types of the person's dance skills
 
@@ -23213,10 +22840,7 @@ type SelfVerifiedNameData {
 	Throws UNAUTHENTICATED if not logged in
 	@entitlement(PRO_ANY_TIER)
 	"""
-	educationalHistory(
-		after: ID
-		first: Int
-	): SelfVerifiedNameEducationalHistoryConnection
+	educationalHistory(after: ID, first: Int): SelfVerifiedNameEducationalHistoryConnection
 	"""
 	The person's ethnic appearances, i.e. ethnicities the person appears to be in
 
@@ -23242,11 +22866,7 @@ type SelfVerifiedNameData {
 	"""
 	The person's guild affiliations
 	"""
-	guildAffiliations(
-		after: ID
-		filter: GuildAffiliationsFilter
-		first: Int!
-	): GuildAffiliationsConnection
+	guildAffiliations(after: ID, filter: GuildAffiliationsFilter, first: Int!): GuildAffiliationsConnection
 	"""
 	The person's guild status
 
@@ -23344,10 +22964,7 @@ type SelfVerifiedNameData {
 	Throws UNAUTHENTICATED if not logged in
 	@entitlement(PRO_ANY_TIER)
 	"""
-	resumeCustomSections(
-		after: ID
-		first: Int
-	): SelfVerifiedResumeCustomSectionConnection
+	resumeCustomSections(after: ID, first: Int): SelfVerifiedResumeCustomSectionConnection
 	"""
 	The person's additional resume details
 
@@ -24086,7 +23703,7 @@ input SignInOptionRedirectURLInput {
 	"""
 	Optional additional web context for URL building including the client context (i.e. ubid token)
 	Required if associationHandle in input is an association handle used in AAP (Amazon account pool) creation/conversion
-	    i.e. 'imdb_amazon', 'imdb_pro_amazon', etc., otherwise throws GRAPHQL_VALIDATION_FAILED error
+	i.e. 'imdb_amazon', 'imdb_pro_amazon', etc., otherwise throws GRAPHQL_VALIDATION_FAILED error
 	"""
 	additionalWebAuthContext: AdditionalWebAuthContext
 	"""
@@ -24838,14 +24455,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	akas(
-		after: ID
-		before: ID
-		filter: AkaFilter
-		first: Int
-		last: Int
-		sort: AkaSort
-	): AkaConnection
+	akas(after: ID, before: ID, filter: AkaFilter, first: Int, last: Int, sort: AkaSort): AkaConnection
 	"""
 	Alexa top questions.
 
@@ -24869,12 +24479,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	alternateVersions(
-		after: ID
-		before: ID
-		first: Int
-		last: Int
-	): AlternateVersionConnection
+	alternateVersions(after: ID, before: ID, first: Int, last: Int): AlternateVersionConnection
 	"""
 	Album products of Amazon Music related to this title
 
@@ -25008,9 +24613,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	companyCreditCategories(
-		filter: CompanyCreditsFilter
-	): [CompanyCreditCategoryWithCompanyCredits]
+	companyCreditCategories(filter: CompanyCreditsFilter): [CompanyCreditCategoryWithCompanyCredits]
 	"""
 	---------------------
 	Graphlet Details:
@@ -25020,13 +24623,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	companyCredits(
-		after: ID
-		before: ID
-		filter: CompanyCreditsFilter
-		first: Int
-		last: Int
-	): CompanyCreditConnection
+	companyCredits(after: ID, before: ID, filter: CompanyCreditsFilter, first: Int, last: Int): CompanyCreditConnection
 	"""
 	---------------------
 	Graphlet Details:
@@ -25079,13 +24676,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	crazyCredits(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): CrazyCreditConnection
+	crazyCredits(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): CrazyCreditConnection
 	"""
 	---------------------
 	Graphlet Details:
@@ -25095,9 +24686,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	creditCategories(
-		filter: TitleCreditCategoryWithCreditsFilter
-	): [TitleCreditCategoryWithCredits]
+	creditCategories(filter: TitleCreditCategoryWithCreditsFilter): [TitleCreditCategoryWithCredits]
 	"""
 	Vends name credits for this title, grouped into "Groupings" in a way that best represents a title's end credits.
 	Actor and Actress credits are grouped together in a 'Cast' grouping.
@@ -25412,9 +25001,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	externalLinkCategories(
-		filter: ExternalLinksFilter
-	): [ExternalLinkCategoryWithExternalLinks]
+	externalLinkCategories(filter: ExternalLinksFilter): [ExternalLinkCategoryWithExternalLinks]
 	"""
 	External links for a title.
 
@@ -25426,13 +25013,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	externalLinks(
-		after: ID
-		before: ID
-		filter: ExternalLinksFilter
-		first: Int
-		last: Int
-	): ExternalLinkConnection
+	externalLinks(after: ID, before: ID, filter: ExternalLinksFilter, first: Int, last: Int): ExternalLinkConnection
 	"""
 	Frequently asked questions (FAQs) for a title.
 
@@ -25444,14 +25025,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	faqs(
-		after: ID
-		before: ID
-		filter: FaqsFilter
-		first: Int
-		jumpTo: ID
-		last: Int
-	): FaqConnection
+	faqs(after: ID, before: ID, filter: FaqsFilter, first: Int, jumpTo: ID, last: Int): FaqConnection
 	"""
 	Featured polls for the title.
 	Capped at <LIMIT> polls. No pagination
@@ -25489,12 +25063,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	filmingDates(
-		after: ID
-		before: ID
-		first: Int
-		last: Int
-	): FilmingDatesConnection
+	filmingDates(after: ID, before: ID, first: Int, last: Int): FilmingDatesConnection
 	"""
 	Title filming locations
 
@@ -25506,13 +25075,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	filmingLocations(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): FilmingLocationConnection
+	filmingLocations(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): FilmingLocationConnection
 	"""
 	---------------------
 	Graphlet Details:
@@ -25534,14 +25097,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	goofs(
-		after: ID
-		before: ID
-		filter: GoofsFilter
-		first: Int
-		jumpTo: ID
-		last: Int
-	): GoofConnection
+	goofs(after: ID, before: ID, filter: GoofsFilter, first: Int, jumpTo: ID, last: Int): GoofConnection
 	"""
 	---------------------
 	Graphlet Details:
@@ -25651,9 +25207,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	keywordItemCategories(
-		filter: TitleKeywordItemCategoriesFilter
-	): [TitleKeywordItemCategoryWithKeywords]
+	keywordItemCategories(filter: TitleKeywordItemCategoriesFilter): [TitleKeywordItemCategoryWithKeywords]
 	"""
 	Title keywords.
 
@@ -25665,14 +25219,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	keywords(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-		sort: TitleKeywordsSort
-	): TitleKeywordConnection
+	keywords(after: ID, before: ID, first: Int, jumpTo: ID, last: Int, sort: TitleKeywordsSort): TitleKeywordConnection
 	"""
 	The latest trailer for a title
 
@@ -25751,10 +25298,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-core-tech
 	"""
-	meterRank(
-		input: TitleMeterRankingInput
-		useEntitlement: Boolean = true
-	): TitleMeterRanking
+	meterRank(input: TitleMeterRankingInput, useEntitlement: Boolean = true): TitleMeterRanking
 	"""
 	History of IMDbPro Title meter rankings of a title.
 	Requires entitlement proving Pro subscription.
@@ -25768,9 +25312,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-core-tech
 	"""
-	meterRankingHistory(
-		input: TitleMeterRankingHistoryInput
-	): TitleMeterRankingHistory
+	meterRankingHistory(input: TitleMeterRankingHistoryInput): TitleMeterRankingHistory
 	"""
 	Similar titles to this title. Clients may request a max of 100 similar titles. Number of titles returned may be fewer.
 
@@ -25994,10 +25536,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-coverage-tech
 	"""
-	primaryWatchOption(
-		location: WatchOptionsLocation
-		promotedProvider: String
-	): PrimaryWatchOption
+	primaryWatchOption(location: WatchOptionsLocation, promotedProvider: String): PrimaryWatchOption
 	"""
 	Array of most important credit categories and credits in that category
 
@@ -26009,9 +25548,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	principalCredits(
-		filter: PrincipalCreditsFilter
-	): [PrincipalCreditsForCategory]
+	principalCredits(filter: PrincipalCreditsFilter): [PrincipalCreditsForCategory]
 	"""
 	Principal Credits gives the primary creative contributors to a title, organized by groupings.
 
@@ -26081,12 +25618,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	productionDates(
-		after: ID
-		before: ID
-		first: Int
-		last: Int
-	): ProductionDatesConnection
+	productionDates(after: ID, before: ID, first: Int, last: Int): ProductionDatesConnection
 	"""
 	Current production stage of the title, and the status history.
 
@@ -26110,14 +25642,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	quotes(
-		after: ID
-		before: ID
-		filter: TitleQuotesFilter
-		first: Int
-		jumpTo: ID
-		last: Int
-	): TitleQuoteConnection
+	quotes(after: ID, before: ID, filter: TitleQuotesFilter, first: Int, jumpTo: ID, last: Int): TitleQuoteConnection
 	"""
 	The lifetime box office gross for this title within the specified area. Rank
 	is compared to the lifetime grosses of other titles within the specified area.
@@ -26130,9 +25655,7 @@ type Title {
 	- Cache TTL: 3600 seconds
 	- Slack Channel: #imdb-coverage-tech
 	"""
-	rankedLifetimeGross(
-		boxOfficeArea: BoxOfficeArea!
-	): RankedLifetimeBoxOfficeGross
+	rankedLifetimeGross(boxOfficeArea: BoxOfficeArea!): RankedLifetimeBoxOfficeGross
 	"""
 	The lifetime box office grosses for this title within the specified areas.
 	Rank is compared to the lifetime grosses of other titles within the specified area.
@@ -26210,13 +25733,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	releaseDates(
-		after: ID
-		before: ID
-		filter: TitleReleaseDatesFilter
-		first: Int
-		last: Int
-	): ReleaseDateConnection
+	releaseDates(after: ID, before: ID, filter: TitleReleaseDatesFilter, first: Int, last: Int): ReleaseDateConnection
 	"""
 	The year of the title. The existing IMDb concept of a year that is independent of the release
 	date.
@@ -26270,12 +25787,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-community-and-video
 	"""
-	reviews(
-		after: ID
-		filter: ReviewsFilter
-		first: Int!
-		sort: ReviewsSort
-	): ReviewsConnection
+	reviews(after: ID, filter: ReviewsFilter, first: Int!, sort: ReviewsSort): ReviewsConnection
 	"""
 	The runtime for the title, in seconds
 
@@ -26299,13 +25811,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	runtimes(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): RuntimeConnection
+	runtimes(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): RuntimeConnection
 	"""
 	For titles which are part of a series, provides information about its position within the series
 
@@ -26329,13 +25835,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	soundtrack(
-		after: ID
-		before: ID
-		first: Int
-		jumpTo: ID
-		last: Int
-	): SoundtrackConnection
+	soundtrack(after: ID, before: ID, first: Int, jumpTo: ID, last: Int): SoundtrackConnection
 	"""
 	A list of the languages spoken in the title.
 
@@ -26371,9 +25871,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	technicalSpecifications(
-		filter: TechnicalSpecificationsFilter
-	): TechnicalSpecifications
+	technicalSpecifications(filter: TechnicalSpecificationsFilter): TechnicalSpecifications
 	"""
 	The genres for the title.
 
@@ -26436,14 +25934,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	trivia(
-		after: ID
-		before: ID
-		filter: TriviaFilter
-		first: Int
-		jumpTo: ID
-		last: Int
-	): TriviaConnection
+	trivia(after: ID, before: ID, filter: TriviaFilter, first: Int, jumpTo: ID, last: Int): TriviaConnection
 	"""
 	---------------------
 	Graphlet Details:
@@ -26453,9 +25944,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-content-api
 	"""
-	triviaCategories(
-		filter: TriviaCategoryWithTriviaFilter
-	): [TriviaCategoryWithTrivia]
+	triviaCategories(filter: TriviaCategoryWithTriviaFilter): [TriviaCategoryWithTrivia]
 	"""
 	Returns the 'trivia' Link.
 
@@ -26520,12 +26009,7 @@ type Title {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-community-and-video
 	"""
-	videoStrip(
-		after: ID
-		filter: VideosQueryFilter
-		first: Int
-		sort: VideoSort
-	): VideoConnection
+	videoStrip(after: ID, filter: VideosQueryFilter, first: Int, sort: VideoSort): VideoConnection
 	"""
 	Videos related to the title, grouped by video type
 
@@ -26980,7 +26464,7 @@ input TitleCreditsV2Sort {
 	3. Credited Status - Credited roles take precedence over uncredited
 	4. Episode Count - For a series, higher episode counts appear first
 	5. Order - For a series, sum the order values across all episodes. For non-series, use the order value for the credit.
-	   (Order numbers are ignored from when a large order value gap is found between 2 credits.)
+	(Order numbers are ignored from when a large order value gap is found between 2 credits.)
 	6. Grouped Order - Order based on multi-level groupings, as seen in Writer category.
 	7. Chronological Order - For a series, sort earlier start years ahead of later start years. And similar for end years.
 	8. Name Text - Alphabetical ordering by name, which typically treats "Firstname Lastname" as "Lastname, Firstname".
@@ -28569,7 +28053,7 @@ type TrackerConsent implements Consent {
 	"""
 	base64 encoded json representation of the consent information
 	e.g. eyJkZWNpc2lvbiI6ICJBQ0NFUFRfQUxMIiwicHVycG9zZXMiOiBbMSwgMiwgM10sInZlbmRvcnMiOiBbMywgNSwgN119
-	     Decoded: {"decision":"ACCEPT_ALL","is_required":true}
+	Decoded: {"decision":"ACCEPT_ALL","is_required":true}
 	"""
 	consentInfo: String
 	consentOperation: ConsentOperation!
@@ -29138,9 +28622,7 @@ type UIWorkflowFeedbackDisplayElement {
 Union type for all possible feedback elements in the UI workflow.
 Combines both interactive and display-only feedback elements.
 """
-union UIWorkflowFeedbackElement =
-	| UIWorkflowFeedbackCheckboxFormElement
-	| UIWorkflowFeedbackDisplayElement
+union UIWorkflowFeedbackElement = UIWorkflowFeedbackCheckboxFormElement | UIWorkflowFeedbackDisplayElement
 
 """
 Represents the global menu structure for the UI workflow system.
@@ -29470,11 +28952,7 @@ type User {
 	"""
 	Returns the current user's list of interests. Currently only 50 interests can be stored.
 	"""
-	interests(
-		after: ID
-		filter: UserInterestsFilter
-		first: Int!
-	): UserInterestsConnection!
+	interests(after: ID, filter: UserInterestsFilter, first: Int!): UserInterestsConnection!
 	"""
 	Returns if account is Amazon Account Pool (AAP) account or already converted to AAP account.
 	"""
@@ -30157,10 +29635,7 @@ type Video {
 	- Cache TTL: 0 seconds
 	- Slack Channel: #imdb-pwr-public
 	"""
-	personalizedSuggestedVideos(
-		after: ID
-		first: Int!
-	): PersonalizedSuggestedVideosConnection
+	personalizedSuggestedVideos(after: ID, first: Int!): PersonalizedSuggestedVideosConnection
 	"""
 	The URLs that can be used by video players to playback the content of the video.
 	This is a very finite set of known encodings thus there is no pagination available
@@ -30236,9 +29711,7 @@ type Video {
 	- Cache TTL: Varies. Reach out to graphlet owner
 	- Slack Channel: #imdb-community-and-video
 	"""
-	recommendedTimedTextTrack(
-		filter: RecommendedVideoTimedTextTrackFilter
-	): VideoTimedTextTrack
+	recommendedTimedTextTrack(filter: RecommendedVideoTimedTextTrackFilter): VideoTimedTextTrack
 	"""
 	Names related to the given video. Results capped to first 100
 
@@ -30639,9 +30112,7 @@ enum VideoRecommendationsDisplayType {
 	PORTRAIT_ORIENTATION
 }
 
-union VideoRecommendationsItem =
-	| VideoRecommendationsAdItem
-	| VideoRecommendationsVideoItem
+union VideoRecommendationsItem = VideoRecommendationsAdItem | VideoRecommendationsVideoItem
 
 type VideoRecommendationsItemsEdge {
 	cursor: ID!

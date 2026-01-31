@@ -1,14 +1,31 @@
 services:
-  cinebetter:
+  cinebetter-ts:
     build: .
-    container_name: cinebetter
+    container_name: cinebetter-ts
     restart: always
     ports:
-      - "${PORT:-3000}:${PORT:-3000}"
+      - '${PORT:-3000}:${PORT:-3000}'
     environment:
       - NODE_ENV=production
       - PORT=${PORT:-3000}
-      - SQLITE_DB=file:/app/data/prod.db
       - TMDB_TOKEN=${TMDB_TOKEN:?error}
+      - SQLITE_DB=${SQLITE_DB}
+      - SQLITE_AUTH=${SQLITE_AUTH}
+      - VALKEY_HOST=valkey
+      - VALKEY_PASSWORD=${VALKEY_PASSWORD}
     volumes:
-      - ./data:/app/data
+      - sqlite_data:/data
+    depends_on:
+      - valkey
+
+  valkey:
+    image: valkey/valkey:latest
+    container_name: valkey
+    restart: always
+    command: sh -c "valkey-server --port ${VALKEY_PORT:-6379} ${VALKEY_PASSWORD:+--requirepass $VALKEY_PASSWORD}"
+    volumes:
+      - valkey_data:/data
+
+volumes:
+  valkey_data:
+  sqlite_data:
