@@ -19,3 +19,8 @@ body {
 	color: var(--spectrum-global-color-gray-600);
 	font-size: var(--spectrum-global-dimension-font-size-75);
 }
+
+.error-text {
+	color: var(--spectrum-global-color-red-600);
+	font-size: var(--spectrum-global-dimension-font-size-75);
+}

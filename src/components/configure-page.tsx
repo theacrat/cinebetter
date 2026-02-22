@@ -4,11 +4,12 @@ import { useState } from "react";
 
 import type { UserSettings } from "@/lib/user-settings";
 
-import ConfigureForm from "./configure-form";
-import ConfigureResult from "./configure-result";
+import ConfigureForm from "./configure/configure-form";
+import ConfigureResult from "./configure/configure-result";
 
 interface ConfigurePageProps {
 	readonly initialSettings: UserSettings;
+	readonly enableTmdb: boolean;
 }
 
 const HEADING = (
@@ -18,7 +19,7 @@ const HEADING = (
 	</Flex>
 );
 
-const ConfigurePage = ({ initialSettings }: ConfigurePageProps): JSX.Element => {
+const ConfigurePage = ({ initialSettings, enableTmdb }: ConfigurePageProps): JSX.Element => {
 	const [manifestUrl, setManifestUrl] = useState<string>("");
 
 	return (
@@ -31,7 +32,11 @@ const ConfigurePage = ({ initialSettings }: ConfigurePageProps): JSX.Element => 
 		>
 			<Well maxWidth="size-6000" width="90%">
 				{HEADING}
-				<ConfigureForm setManifestUrl={setManifestUrl} initialSettings={initialSettings} />
+				<ConfigureForm
+					setManifestUrl={setManifestUrl}
+					initialSettings={initialSettings}
+					enableTmdb={enableTmdb}
+				/>
 				{manifestUrl !== "" && <ConfigureResult manifestUrl={manifestUrl} />}
 			</Well>
 		</Flex>
