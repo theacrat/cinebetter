@@ -1,10 +1,10 @@
 import { PrismaD1 } from "@prisma/adapter-d1";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
+import stripUndefined from "strip-undefined";
 
 import env from "@/env";
 import { PrismaClient } from "@/generated/prisma/client";
 import getWorkers from "@/utils/runtime";
-import stripUndefined from "@/utils/strip-undefined";
 
 declare global {
 	var __cinebetterPrisma: PrismaClient | undefined;

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import stripUndefined from "strip-undefined";
 import type { ReadonlyDeep } from "type-fest";
 
 import env from "@/env";
@@ -13,7 +14,6 @@ import {
 	isDetailedCatalog,
 	isSupportedType,
 } from "@/services/manifest";
-import stripUndefined from "@/utils/strip-undefined";
 
 const NO_CACHE_TTL_DAYS = 0;
 const NOT_FOUND_STATUS = 404;

@@ -1,12 +1,12 @@
 import type { ContentType, Link, MetaItem, Video } from "stremio-types";
 import { ContentTypes } from "stremio-types";
+import stripUndefined from "strip-undefined";
 import type { ReadonlyDeep } from "type-fest";
 
 import type { ReqContext } from "@/lib/req-context";
 import { encodeSettings } from "@/lib/user-settings";
 import { CinebetterCatalogs } from "@/services/manifest";
 import matchId from "@/services/tmdb";
-import stripUndefined from "@/utils/strip-undefined";
 
 import type titleFull from "./graphql/title-full";
 import type { DocumentData } from "./graphql/types";

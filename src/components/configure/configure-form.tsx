@@ -1,8 +1,8 @@
 import { Form, TextField, Checkbox, Button, Text } from "@adobe/react-spectrum";
 import type { JSX } from "react";
 
-import type { UserSettings } from "@/lib/user-settings";
 import useConfigureForm from "@/components/configure/use-configure-form";
+import type { UserSettings } from "@/lib/user-settings";
 
 interface ConfigureFormProps {
 	readonly setManifestUrl: (url: string) => void;
@@ -10,22 +10,22 @@ interface ConfigureFormProps {
 	readonly enableTmdb: boolean;
 }
 
-const NO_TOKEN = (<>
-	<br/>
-	<Text UNSAFE_className="error-text">TMDB_TOKEN needs to be set on the server to use this option.</Text>
-</>);
+const NO_TOKEN = (
+	<>
+		<br />
+		<Text UNSAFE_className="error-text">
+			TMDB_TOKEN needs to be set on the server to use this option.
+		</Text>
+	</>
+);
 
 const ConfigureForm = ({
 	initialSettings,
 	setManifestUrl,
 	enableTmdb,
 }: ConfigureFormProps): JSX.Element => {
-	const { settings,
-		onLanguageChange,
-		onDiscoverOnlyChange,
-		onHideLowQualityChange,
-		onSubmit
-	} =	useConfigureForm({ initialSettings, setManifestUrl });
+	const { settings, onLanguageChange, onDiscoverOnlyChange, onHideLowQualityChange, onSubmit } =
+		useConfigureForm({ initialSettings, setManifestUrl });
 
 	return (
 		<Form marginBottom="size-200" onSubmit={onSubmit} validationBehavior="native">

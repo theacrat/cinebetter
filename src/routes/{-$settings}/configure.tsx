@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 
-import env from "@/env";
 import ConfigurePage from "@/components/configure-page";
+import env from "@/env";
 import { decodeSettings, DEFAULT_SETTINGS } from "@/lib/user-settings";
 
 const hasTmdbToken = createServerFn({ method: "GET" }).handler(
@@ -22,18 +22,8 @@ function ConfigureComponent() {
 
 	try {
 		const userSettings = settings === undefined ? DEFAULT_SETTINGS : decodeSettings(settings);
-		return (
-			<ConfigurePage
-				initialSettings={userSettings}
-				enableTmdb={enableTmdb}
-			/>
-		);
+		return <ConfigurePage initialSettings={userSettings} enableTmdb={enableTmdb} />;
 	} catch {
-		return (
-			<ConfigurePage
-				initialSettings={DEFAULT_SETTINGS}
-				enableTmdb={enableTmdb}
-			/>
-		);
+		return <ConfigurePage initialSettings={DEFAULT_SETTINGS} enableTmdb={enableTmdb} />;
 	}
 }

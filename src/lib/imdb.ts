@@ -1,9 +1,9 @@
 import type { CombinedError, TypedDocumentNode } from "@urql/core";
 import { cacheExchange, Client, fetchExchange } from "@urql/core";
+import stripUndefined from "strip-undefined";
 import type { ReadonlyDeep } from "type-fest";
 
 import type { UserSettings } from "@/lib/user-settings";
-import stripUndefined from "@/utils/strip-undefined";
 
 const USER_AGENT_HEADER =
 	"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.3";

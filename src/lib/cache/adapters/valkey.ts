@@ -4,13 +4,13 @@ import { promisify } from "node:util";
 import { gunzip, gzip } from "node:zlib";
 
 import type { Decoder, GlideClient, HashDataType } from "@valkey/valkey-glide";
+import stripUndefined from "strip-undefined";
 import { objectKeys } from "ts-extras";
 import type { ReadonlyDeep } from "type-fest";
 
 import env from "@/env";
 import type { CacheAdapter, CachePutOptions } from "@/lib/cache";
 import { daysToCacheTime, setHeaders } from "@/utils/cache";
-import stripUndefined from "@/utils/strip-undefined";
 
 interface CacheData extends Record<string, Buffer> {
 	readonly body: Buffer;

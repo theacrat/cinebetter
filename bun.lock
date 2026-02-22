@@ -27,6 +27,7 @@
         "react-dom": "^19.2.0",
         "rxjs": "^7.8.2",
         "stremio-types": "^0.52.0",
+        "strip-undefined": "^1.0.0",
         "tailwindcss": "^4.0.6",
         "tmdb-ts": "^2.2.0",
         "ts-extras": "0.17.0",
@@ -2612,6 +2613,8 @@
     "strip-json-comments": ["strip-json-comments@3.1.1", "", {}, "sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig=="],
 
     "strip-literal": ["strip-literal@3.1.0", "", { "dependencies": { "js-tokens": "^9.0.1" } }, "sha512-8r3mkIM/2+PpjHoOtiAW8Rg3jJLHaV7xPwG+YRGrv6FP0wwk/toTpATxWYOW0BKdWwl82VT2tFYi5DlROa0Mxg=="],
+
+    "strip-undefined": ["strip-undefined@1.0.0", "", {}, "sha512-8KQYuuX4ytYs9iOYD+EkvS1lJKr5yfP+OzP02fbiU5iZVNqhIxCvXaiAQb6IOImmfSKQkpUjD4XA+eXY8rlKEQ=="],
 
     "supports-color": ["supports-color@7.2.0", "", { "dependencies": { "has-flag": "^4.0.0" } }, "sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw=="],
 

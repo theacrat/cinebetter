@@ -15,15 +15,20 @@ const getMaxAge = (headers: Readonly<Headers>): number => {
 	return Number.parseInt(maxAge ?? DEFAULT_MAX_AGE, 10);
 };
 
-const setHeaders = (headers: Readonly<Headers>, ttl: number, cachedTime?: Readonly<Date>): Headers =>
-{
+const setHeaders = (
+	headers: Readonly<Headers>,
+	ttl: number,
+	cachedTime?: Readonly<Date>,
+): Headers => {
 	const ageHeader: [string, string][] =
 		cachedTime === undefined
 			? []
-			: [[
-					"Age",
-					Math.floor((Date.now() - cachedTime.getTime()) / MILLISECONDS_PER_SECOND).toString(),
-				]];
+			: [
+					[
+						"Age",
+						Math.floor((Date.now() - cachedTime.getTime()) / MILLISECONDS_PER_SECOND).toString(),
+					],
+				];
 
 	return new Headers([
 		...headers.entries(),

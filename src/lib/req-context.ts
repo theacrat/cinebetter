@@ -1,8 +1,8 @@
+import stripUndefined from "strip-undefined";
 import type { ReadonlyDeep } from "type-fest";
 
 import type { UserSettings } from "@/lib/user-settings";
 import { decodeSettings, DEFAULT_SETTINGS } from "@/lib/user-settings";
-import stripUndefined from "@/utils/strip-undefined";
 
 interface ReqContext {
 	readonly req: ReadonlyDeep<Request>;
