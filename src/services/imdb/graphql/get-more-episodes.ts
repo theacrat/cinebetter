@@ -1,6 +1,6 @@
-import { graphql } from '../../../generated/gql';
+import { graphql } from "@/generated/gql";
 
-export const GetMoreEpisodesQuery = graphql(`
+const GetMoreEpisodesQuery = graphql(`
 	query GetMoreEpisodes($id: ID!, $after: ID!) {
 		title(id: $id) {
 			episodes {
@@ -15,3 +15,5 @@ export const GetMoreEpisodesQuery = graphql(`
 		}
 	}
 `);
+
+export { GetMoreEpisodesQuery as default };

@@ -1,0 +1,108 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": [
+		"eslint",
+		"typescript",
+		"unicorn",
+		"react",
+		"react-perf",
+		"oxc",
+		"import",
+		"jsx-a11y",
+		"node",
+		"promise"
+	],
+	"categories": {
+		"correctness": "error",
+		"suspicious": "error",
+		"pedantic": "error",
+		"style": "error",
+		"restriction": "error",
+		"perf": "error"
+	},
+	"rules": {
+		"import/max-dependencies": ["warn", { "ignoreTypeImports": true }],
+		"eslint/eqeqeq": ["error", "smart"],
+		"eslint/max-lines": [
+			"warn",
+			{
+				"skipBlankLines": true,
+				"skipComments": true
+			}
+		],
+		"eslint/max-lines-per-function": [
+			"warn",
+			{
+				"skipBlankLines": true,
+				"skipComments": true
+			}
+		],
+		"eslint/max-statements": "off",
+		"eslint/no-continue": "off",
+		"eslint/no-empty": "off",
+		"eslint/no-eq-null": "off",
+		"eslint/require-await": "off",
+		"eslint/no-ternary": "off",
+		"eslint/no-undef": "off",
+		"eslint/no-undefined": "off",
+		"eslint/no-void": "off",
+		"eslint/no-duplicate-imports": [
+			"error",
+			{
+				"allowSeparateTypeImports": true
+			}
+		],
+		"eslint/sort-imports": "off",
+		"import/no-default-export": "off",
+		"import/no-named-export": "off",
+		"import/no-nodejs-modules": "off",
+		"import/unambiguous": "off",
+		"oxc/no-async-await": "off",
+		"oxc/no-optional-chaining": "off",
+		"oxc/no-rest-spread-properties": "off",
+		"react/jsx-filename-extension": [
+			"error",
+			{
+				"extensions": ["jsx", "tsx"]
+			}
+		],
+		"react/react-in-jsx-scope": "off",
+		"typescript/consistent-type-imports": ["error", { "disallowTypeAnnotations": false }],
+		"typescript/prefer-readonly-parameter-types": [
+			"error",
+			{
+				"allow": [
+					{
+						"from": "package",
+						"name": "SyntheticEvent",
+						"package": "react"
+					}
+				]
+			}
+		]
+	},
+	"overrides": [
+		{
+			"files": ["src/router.tsx", "src/routes/**/*.tsx"],
+			"rules": {
+				"eslint/func-style": ["error", "declaration"],
+				"eslint/no-use-before-define": ["error", { "functions": false }],
+				"import/exports-last": "off",
+				"import/no-default-export": "error",
+				"import/prefer-default-export": "off"
+			}
+		},
+		{
+			"files": ["src/routes/**/*.ts"],
+			"rules": {
+				"import/no-default-export": "error",
+				"import/prefer-default-export": "off"
+			}
+		}
+	],
+	"env": {
+		"builtin": true
+	},
+	"globals": {},
+	"ignorePatterns": ["src/generated/**", "src/routeTree.gen.ts", "worker-configuration.d.ts"]
+}

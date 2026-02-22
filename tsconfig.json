@@ -5,7 +5,6 @@
 		"@tsconfig/strictest/tsconfig.json"
 	],
 	"compilerOptions": {
-		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./src/*"]
 		},
@@ -15,6 +14,7 @@
 				"schema": "./schemas/schema.graphql"
 			}
 		],
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
 		"types": ["vite/client", "./worker-configuration.d.ts"]
 	},
 	"include": ["./src/**/*", "./*.ts"]

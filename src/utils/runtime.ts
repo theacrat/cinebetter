@@ -1,9 +1,9 @@
-export async function getWorkers() {
+const getWorkers = async (): Promise<typeof import("cloudflare:workers") | undefined> => {
 	try {
-		const workers = await import('cloudflare:workers');
-		return workers;
-	}
-	catch {
+		return await import("cloudflare:workers");
+	} catch {
 		return undefined;
 	}
-}
+};
+
+export default getWorkers;

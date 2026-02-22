@@ -1,22 +1,38 @@
-import type { CacheAdapter } from '..';
+import type { ReadonlyDeep } from "type-fest";
 
-async function getCache(key: string) {
+import type { CacheAdapter } from "@/lib/cache";
+
+const getCache = async (key: string): Promise<Cache | undefined> => {
 	try {
 		return await caches.open(key);
-	}
-	catch {
+	} catch {
 		return undefined;
 	}
-}
+};
 
-export async function createBrowserCacheAdapter(key: string): Promise<CacheAdapter | undefined> {
+const createBrowserCacheAdapter = async (key: string): Promise<CacheAdapter | undefined> => {
 	const cache = await getCache(key);
 	if (!cache) {
-		return;
+		return undefined;
 	}
 
 	return {
-		match: async req => cache.match(req),
-		put: async (req, res) => cache.put(req, res),
+		match: async (req: ReadonlyDeep<Request>): Promise<Response | undefined> => {
+			const cacheRequest = new Request(req.url, {
+				headers: req.headers,
+				method: req.method,
+			});
+			return (await cache.match(cacheRequest)) ?? undefined;
+		},
+		put: async ({ req, res }): Promise<void> => {
+			const cacheRequest = new Request(req.url, {
+				headers: req.headers,
+				method: req.method,
+			});
+			const cacheResponse = new Response(res.body, res);
+			await cache.put(cacheRequest, cacheResponse);
+		},
 	};
-}
+};
+
+export default createBrowserCacheAdapter;

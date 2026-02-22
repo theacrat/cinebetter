@@ -1,117 +1,234 @@
-import { objectEntries, objectFromEntries } from 'ts-extras';
-import { z } from 'zod';
+import { objectFromEntries, objectHasOwn, objectKeys } from "ts-extras";
+import { z } from "zod";
 
-const languageCodec = z.codec(z.string(), z.string(), {
-	decode: v => normaliseLanguageCode(v),
-	encode: v => v,
-});
+const LANGUAGE_CODE_PART_LENGTH = 2;
 
-const boolCodec = z.codec(z.enum(['0', '1']), z.boolean(), {
-	decode: v => v === '1',
-	encode: v => (v ? '1' : '0'),
-});
-
-const { paramsSchema, settingsSchema: _settingsSchema, codec: settingsCodec } = createSettingsCodec({
-	languageCode: defineSetting('l', z.string(), z.string(), languageCodec, 'en-US'),
-	hideLowQuality: defineSetting('h', z.enum(['0', '1']), z.boolean(), boolCodec, '0'),
-	discoverOnly: defineSetting('d', z.enum(['0', '1']), z.boolean(), boolCodec, '0'),
-});
-
-function defineSetting<
-	TParam extends string,
-	TParamSchema extends z.ZodTypeAny,
-	TSettingsSchema extends z.ZodTypeAny,
->(
-	param: TParam,
-	paramSchema: TParamSchema,
-	settingsSchema: TSettingsSchema,
-	codec: z.ZodCodec<z.ZodTypeAny, z.ZodTypeAny>,
-	defaultValue: z.input<TParamSchema>,
-) {
-	return { param, paramSchema, settingsSchema, codec, default: defaultValue };
-}
-
-function createSettingsCodec<
-	TMapping extends Record<string, ReturnType<typeof defineSetting>>,
->(mapping: TMapping) {
-	type ParamsShape = {
-		[K in keyof TMapping as TMapping[K]['param']]: z.ZodDefault<TMapping[K]['paramSchema']>;
-	};
-	type SettingsShape = {
-		[K in keyof TMapping]: TMapping[K]['settingsSchema'];
-	};
-
-	const paramsSchema = z.object(
-		objectFromEntries(
-			objectEntries(mapping).map(([, def]) => [def.param, def.paramSchema.default(def.default)]),
-		),
-	) as z.ZodObject<ParamsShape>;
-
-	const settingsSchema = z.object(
-		objectFromEntries(
-			objectEntries(mapping).map(([key, def]) => [key, def.settingsSchema]),
-		),
-	) as z.ZodObject<SettingsShape>;
-
-	const codec = z.codec(paramsSchema, settingsSchema, {
-		decode: (params: Record<string, unknown>) =>
-			objectFromEntries(
-				objectEntries(mapping).map(([settingsKey, { param, codec }]) => [
-					settingsKey,
-					codec.decode(params[param]),
-				]),
-			),
-		encode: (settings: Record<string, unknown>) =>
-			objectFromEntries(
-				objectEntries(mapping).map(([settingsKey, { param, codec }]) => [
-					param,
-					codec.encode(settings[settingsKey]),
-				]),
-			),
-	} as unknown as Parameters<typeof z.codec<typeof paramsSchema, typeof settingsSchema>>[2]);
-
-	return { paramsSchema, settingsSchema, codec };
-}
-
-function normaliseLanguageCode(value: string) {
-	const [lang, region] = value.split('-');
-	if (lang?.length !== 2 || region?.length !== 2) {
+const normaliseLanguageCode = (value: string): string => {
+	const [language, region] = value.split("-");
+	if (
+		language?.length !== LANGUAGE_CODE_PART_LENGTH ||
+		region?.length !== LANGUAGE_CODE_PART_LENGTH
+	) {
 		throw new Error(`Invalid language code: ${value}`);
 	}
-	return `${lang.toLowerCase()}-${region.toUpperCase()}`;
+
+	return `${language.toLowerCase()}-${region.toUpperCase()}`;
+};
+
+const languageCodec = z.codec(z.string(), z.string(), {
+	decode: (value) => normaliseLanguageCode(value),
+	encode: (value) => value,
+});
+
+const boolCodec = z.codec(z.enum(["0", "1"]), z.boolean(), {
+	decode: (value) => value === "1",
+	encode: (value) => (value ? "1" : "0"),
+});
+
+type AnyCodec = z.ZodCodec<z.ZodType, z.ZodType>;
+
+interface SettingDefinition<TParam extends string, TCodec extends z.ZodCodec> {
+	readonly codec: TCodec;
+	readonly defaultValue: z.input<TCodec["in"]>;
+	readonly param: TParam;
 }
 
-export type UserSettings = z.output<typeof _settingsSchema>;
+type SettingsMap = Record<string, SettingDefinition<string, AnyCodec>>;
 
-export const DEFAULT_SETTINGS: UserSettings = settingsCodec.decode({});
+const defineSetting = <TParam extends string, TCodec extends AnyCodec>(
+	param: TParam,
+	codec: TCodec,
+	defaultValue: z.input<TCodec["in"]>,
+): SettingDefinition<TParam, TCodec> => ({ codec, defaultValue, param });
 
-export function encodeSettings(settings: UserSettings): URLSearchParams {
-	const encoded = settingsCodec.encode(settings);
-	const encodedDefault = settingsCodec.encode(DEFAULT_SETTINGS);
-	const params = new URLSearchParams();
+const SETTINGS = {
+	discoverOnly: defineSetting("d", boolCodec, "0"),
+	hideLowQuality: defineSetting("h", boolCodec, "0"),
+	languageCode: defineSetting("l", languageCodec, "en-US"),
+} as const;
 
-	objectEntries(encoded).forEach(([k, v]) => {
-		if (v != null && v !== encodedDefault[k]) {
-			params.set(k, v);
+const mapSettings = <TSettings extends SettingsMap, TResult>(
+	settings: TSettings,
+	mapper: <TKey extends keyof TSettings>(key: TKey, definition: TSettings[TKey]) => TResult,
+): TResult[] =>
+	objectKeys(settings).map((key) => {
+		const definition = settings[key];
+		if (definition === undefined) {
+			throw new Error(`Missing setting definition: ${String(key)}`);
 		}
+		return mapper(key, definition);
 	});
 
-	return params;
-}
+const isCodecShape = (
+	value: Readonly<Record<string, unknown>>,
+): value is Readonly<Record<string, z.ZodType>> =>
+	objectKeys(value).every((shapeValue) => typeof shapeValue === "string");
 
-export function decodeSettings(queryString: string): UserSettings {
-	const urlParams = new URLSearchParams(queryString);
-	const paramEntries = objectFromEntries([...urlParams.entries()]);
-
-	try {
-		return settingsCodec.decode(paramEntries);
+const createInputShape = <TSettings extends SettingsMap>(
+	settings: TSettings,
+): Readonly<Record<string, z.ZodType>> => {
+	const shape = objectFromEntries(
+		mapSettings(settings, (key, definition) => [String(key), definition.codec.in] as const),
+	);
+	if (!isCodecShape(shape)) {
+		throw new Error("Invalid input shape.");
 	}
-	catch (e) {
-		if (e instanceof Error) {
-			console.error(paramsSchema.parse(paramEntries));
+
+	return shape;
+};
+
+const createOutputShape = <TSettings extends SettingsMap>(
+	settings: TSettings,
+): Readonly<Record<string, z.ZodType>> => {
+	const shape = objectFromEntries(
+		mapSettings(settings, (key, definition) => [String(key), definition.codec.out] as const),
+	);
+	if (!isCodecShape(shape)) {
+		throw new Error("Invalid output shape.");
+	}
+
+	return shape;
+};
+
+const SETTINGS_INPUT_SCHEMA = z.object(createInputShape(SETTINGS));
+const SETTINGS_OUTPUT_SCHEMA = z.object(createOutputShape(SETTINGS));
+
+type UserSettings = Readonly<{
+	readonly [TKey in keyof typeof SETTINGS]: z.output<(typeof SETTINGS)[TKey]["codec"]["out"]>;
+}>;
+type EncodedSettings = {
+	readonly [TKey in keyof typeof SETTINGS]: z.output<(typeof SETTINGS)[TKey]["codec"]["in"]>;
+};
+
+const hasOwnKey = <TKey extends string>(
+	value: unknown,
+	key: TKey,
+): value is Readonly<Record<TKey, unknown>> =>
+	typeof value === "object" && value !== null && objectHasOwn(value, key);
+
+const isEncodedSettings = (value: unknown): value is EncodedSettings => {
+	if (typeof value !== "object" || value === null) {
+		return false;
+	}
+
+	for (const key of objectKeys(SETTINGS)) {
+		if (!hasOwnKey(value, key)) {
+			return false;
 		}
-		throw new Error('Invalid configuration string.', {
-			cause: e,
-		});
+
+		if (!SETTINGS[key].codec.in.safeParse(value[key]).success) {
+			return false;
+		}
 	}
-}
+
+	return true;
+};
+
+const isUserSettings = (value: unknown): value is UserSettings => {
+	if (typeof value !== "object" || value === null) {
+		return false;
+	}
+
+	for (const key of objectKeys(SETTINGS)) {
+		if (!hasOwnKey(value, key)) {
+			return false;
+		}
+
+		if (!SETTINGS[key].codec.out.safeParse(value[key]).success) {
+			return false;
+		}
+	}
+
+	return true;
+};
+
+const parseQueryInput = (params: Readonly<URLSearchParams>): EncodedSettings => {
+	const parsed = SETTINGS_INPUT_SCHEMA.parse(
+		objectFromEntries(
+			mapSettings(SETTINGS, (key, definition) => [
+				key,
+				params.get(definition.param) ?? definition.defaultValue,
+			]),
+		),
+	);
+
+	if (!isEncodedSettings(parsed)) {
+		throw new Error("Invalid encoded settings.");
+	}
+
+	return parsed;
+};
+
+const decodeFromEncoded = (encoded: EncodedSettings): UserSettings => {
+	const decoded = objectFromEntries(
+		mapSettings(SETTINGS, (key, definition) => {
+			const { codec }: { codec: AnyCodec } = definition;
+			return [key, codec.decode(codec.in.parse(encoded[key]))] as const;
+		}),
+	);
+
+	const parsed = SETTINGS_OUTPUT_SCHEMA.parse(decoded);
+
+	if (!isUserSettings(parsed)) {
+		throw new Error("Invalid decoded settings.");
+	}
+
+	return parsed;
+};
+
+const encodeToQuery = (settings: UserSettings): EncodedSettings => {
+	const encoded = objectFromEntries(
+		mapSettings(SETTINGS, (key, definition) => {
+			const { codec }: { codec: AnyCodec } = definition;
+			return [key, codec.encode(codec.out.parse(settings[key]))] as const;
+		}),
+	);
+	const parsed = SETTINGS_INPUT_SCHEMA.parse(encoded);
+
+	if (!isEncodedSettings(parsed)) {
+		throw new Error("Invalid encoded settings.");
+	}
+
+	return parsed;
+};
+
+const DEFAULT_SETTINGS = decodeFromEncoded(
+	parseQueryInput(
+		new URLSearchParams(
+			objectFromEntries(
+				mapSettings(SETTINGS, (_key, definition) => [definition.param, definition.defaultValue]),
+			),
+		),
+	),
+);
+const DEFAULT_ENCODED_SETTINGS = encodeToQuery(DEFAULT_SETTINGS);
+
+const encodeSettings = (settings: UserSettings): URLSearchParams => {
+	const encodedSettings = encodeToQuery(settings);
+	const entries = mapSettings(SETTINGS, (key, definition) => {
+		const value = encodedSettings[key];
+		return value === DEFAULT_ENCODED_SETTINGS[key]
+			? undefined
+			: ([definition.param, value] as const);
+	}).flatMap<[string, string]>((entry) => {
+		if (entry === undefined) {
+			return [];
+		}
+
+		const [param, value] = entry;
+		return [[param, value]];
+	});
+
+	return new URLSearchParams(entries);
+};
+
+const decodeSettings = (queryString: string): UserSettings => {
+	try {
+		const encoded = parseQueryInput(new URLSearchParams(queryString));
+		return decodeFromEncoded(encoded);
+	} catch (error) {
+		throw new Error("Invalid configuration string.", { cause: error });
+	}
+};
+
+export { DEFAULT_SETTINGS, decodeSettings, encodeSettings, type UserSettings };

@@ -1,6 +1,6 @@
-import { graphql } from '../../../generated/gql';
+import { graphql } from "@/generated/gql";
 
-export const AdvancedTitleSearch = graphql(`
+const AdvancedTitleSearch = graphql(`
 	query AdvancedTitleSearch(
 		$search: AdvancedTitleSearchConstraints!
 		$sort: AdvancedTitleSearchSort!
@@ -89,3 +89,5 @@ export const AdvancedTitleSearch = graphql(`
 		}
 	}
 `);
+
+export default AdvancedTitleSearch;

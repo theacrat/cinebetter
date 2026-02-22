@@ -5,7 +5,7 @@
 	"compatibility_date": "2025-10-08",
 	"compatibility_flags": ["nodejs_compat"],
 	"observability": {
-		"enabled": true
+		"enabled": true,
 	},
 	"upload_source_maps": true,
 	"d1_databases": [
@@ -13,7 +13,7 @@
 			"binding": "IMDB_TMDB_D1",
 			"database_name": "ImdbTmdb",
 			"database_id": "f6be3f50-6556-488d-b378-2d2ce9a47bf0",
-			"migrations_dir": "./schemas/prisma/cf-migrations"
-		}
-	]
+			"migrations_dir": "./schemas/prisma/cf-migrations",
+		},
+	],
 }

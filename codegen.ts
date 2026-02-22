@@ -1,21 +1,29 @@
-import type { CodegenConfig } from '@graphql-codegen/cli';
+import type { CodegenConfig } from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
-	schema: './schemas/schema.graphql',
-	documents: ['src/**/*.ts', '!src/generated/**/*'],
-	ignoreNoDocuments: true,
+	documents: ["src/**/*.ts", "!src/generated/**/*"],
 	generates: {
-		'./src/generated/gql/': {
-			preset: 'client',
+		"./src/generated/gql/": {
+			config: {
+				avoidOptionals: {
+					defaultValue: true,
+					field: true,
+					inputValue: false,
+					object: true,
+				},
+				enumsAsConst: true,
+				extractAllFieldsToTypes: true,
+				immutableTypes: true,
+				useTypeImports: true,
+			},
+			preset: "client",
 			presetConfig: {
 				fragmentMasking: false,
 			},
-			config: {
-				enumsAsConst: true,
-				useTypeImports: true,
-			},
 		},
 	},
+	ignoreNoDocuments: true,
+	schema: "./schemas/schema.graphql",
 };
 
 export default config;

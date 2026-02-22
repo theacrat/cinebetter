@@ -1,2 +1,2 @@
-export * from './catalog';
-export * from './title';
+export { default as getCatalog } from "./catalog";
+export { default as getFullTitle } from "./title";

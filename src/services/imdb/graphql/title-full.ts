@@ -1,6 +1,6 @@
-import { graphql } from '../../../generated/gql';
+import { graphql } from "@/generated/gql";
 
-export const TitleFull = graphql(`
+const TitleFull = graphql(`
 	query Title($id: ID!) {
 		title(id: $id) {
 			id
@@ -88,3 +88,5 @@ export const TitleFull = graphql(`
 		}
 	}
 `);
+
+export default TitleFull;

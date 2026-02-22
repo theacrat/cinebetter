@@ -1,132 +1,160 @@
-import type { TitleQuery } from '@/generated/gql/graphql';
-import type { ImdbClient } from '@/lib/imdb';
-import type { ReqContext } from '@/lib/req-context';
-import { produce } from 'immer';
-import { createClient } from '@/lib/imdb';
-import { GetMoreEpisodesQuery } from './graphql/get-more-episodes';
-import { TitleFull } from './graphql/title-full';
-import { buildTitle } from './transformers';
+import type { ReadonlyDeep } from "type-fest";
 
+import type { ImdbClient } from "@/lib/imdb";
+import { createClient } from "@/lib/imdb";
+import type { ReqContext } from "@/lib/req-context";
+
+import getMoreEpisodesQuery from "./graphql/get-more-episodes";
+import titleFull from "./graphql/title-full";
+import type { DocumentData } from "./graphql/types";
+import { buildTitle } from "./transformers";
+
+const UNKNOWN_SEASON = "unknown";
+const UNKNOWN_EPISODE_OFFSET = 1;
+
+type GetMoreEpisodesData = DocumentData<typeof getMoreEpisodesQuery>;
+type TitleFullData = DocumentData<typeof titleFull>;
+
+type Title = NonNullable<TitleFullData["title"]>;
 type EpisodeEdge = NonNullable<
-	NonNullable<NonNullable<TitleQuery['title']>['episodes']>['episodes']
->['edges'][number];
+	NonNullable<NonNullable<Title["episodes"]>["episodes"]>["edges"][number]
+>;
+type PageInfo = NonNullable<NonNullable<NonNullable<Title["episodes"]>["episodes"]>["pageInfo"]>;
+type EpisodesQueryPage = NonNullable<
+	NonNullable<NonNullable<GetMoreEpisodesData["title"]>["episodes"]>["episodes"]
+>;
 
-type PageInfo = NonNullable<
-	NonNullable<NonNullable<TitleQuery['title']>['episodes']>['episodes']
->['pageInfo'];
+interface EpisodesAccumulator {
+	readonly allEpisodes: readonly EpisodeEdge[];
+	readonly pageInfo: PageInfo;
+}
 
-async function getAllEpisodes(
-	initialEpisodes: Array<EpisodeEdge>,
-	initialPageInfo: PageInfo,
+const normaliseEpisode = (edge: EpisodeEdge, unknownEpisodeNumber: string): EpisodeEdge => {
+	const sourceEpisodeData = edge.node.series?.displayableEpisodeNumber;
+	if (sourceEpisodeData?.displayableSeason.text !== UNKNOWN_SEASON) {
+		return edge;
+	}
+
+	return {
+		...edge,
+		node: {
+			...edge.node,
+			series: {
+				...edge.node.series,
+				displayableEpisodeNumber: {
+					...sourceEpisodeData,
+					displayableSeason: { ...sourceEpisodeData.displayableSeason, text: "0" },
+					episodeNumber: { ...sourceEpisodeData.episodeNumber, text: unknownEpisodeNumber },
+				},
+			},
+		},
+	};
+};
+
+const fetchEpisodePages = async (
+	accumulator: EpisodesAccumulator,
 	titleId: string,
 	client: ImdbClient,
-): Promise<{ allEpisodes: Array<EpisodeEdge>; pageInfo: PageInfo }> {
-	const allEpisodes = [...initialEpisodes];
-	let pageInfo = initialPageInfo;
-
-	while (pageInfo.hasNextPage && pageInfo.endCursor != null) {
-		const nextPage = await client.query(GetMoreEpisodesQuery, {
-			id: titleId,
-			after: pageInfo.endCursor,
-		});
-
-		const nextEpisodes = nextPage?.title?.episodes?.episodes;
-		if (!nextEpisodes) {
-			break;
-		}
-
-		allEpisodes.push(...nextEpisodes.edges);
-
-		pageInfo = nextEpisodes.pageInfo;
+): Promise<EpisodesAccumulator> => {
+	if (!accumulator.pageInfo.hasNextPage || accumulator.pageInfo.endCursor === null) {
+		return accumulator;
 	}
 
-	return { allEpisodes, pageInfo };
-}
+	const nextPage = await client.query(getMoreEpisodesQuery, {
+		after: accumulator.pageInfo.endCursor,
+		id: titleId,
+	});
 
-function normaliseEpisodes(edges: Array<EpisodeEdge>): Array<EpisodeEdge> {
-	return edges.reduce<{
-		edges: Array<EpisodeEdge>;
-		unknownCount: number;
-	}>(
-		(acc, e) => {
-			const episodeData = e?.node.series?.displayableEpisodeNumber;
-			if (!episodeData) {
-				return acc;
-			}
+	const nextEpisodes = nextPage?.title?.episodes?.episodes;
+	if (nextEpisodes?.edges === undefined) {
+		return accumulator;
+	}
 
-			const isUnknown
-				= e.node.series?.displayableEpisodeNumber.displayableSeason.text
-					=== 'unknown';
+	const nextEdges = nextEpisodes.edges.filter((edge) => edge !== null);
 
-			if (!isUnknown) {
-				acc.edges.push(e);
-				return acc;
-			}
-
-			const normalizedEdge = produce(e, (draft) => {
-				const episodeData = draft.node.series?.displayableEpisodeNumber;
-				if (!episodeData) {
-					return;
-				}
-
-				episodeData.displayableSeason.text = '0';
-				episodeData.episodeNumber.text = (acc.unknownCount + 1).toString();
-			});
-
-			acc.edges.push(normalizedEdge);
-			acc.unknownCount++;
-			return acc;
+	return fetchEpisodePages(
+		{
+			allEpisodes: [...accumulator.allEpisodes, ...nextEdges],
+			pageInfo: nextEpisodes.pageInfo,
 		},
-		{ edges: [], unknownCount: 0 },
-	).edges;
-}
+		titleId,
+		client,
+	);
+};
 
-async function processEpisodes(
-	t: NonNullable<TitleQuery['title']>,
-	client: ImdbClient,
-) {
-	if (!t.titleType?.canHaveEpisodes) {
-		return t;
+const normaliseEpisodes = (edges: readonly EpisodeEdge[]): EpisodeEdge[] => {
+	const unknownEpisodeNumbers = new Map(
+		edges
+			.filter(
+				(edge) =>
+					edge.node.series?.displayableEpisodeNumber?.displayableSeason.text === UNKNOWN_SEASON,
+			)
+			.map((edge, index) => [edge, (index + UNKNOWN_EPISODE_OFFSET).toString()] as const),
+	);
+
+	return edges
+		.filter((edge) => edge.node.series?.displayableEpisodeNumber !== undefined)
+		.map((edge) => {
+			const unknownEpisodeNumber = unknownEpisodeNumbers.get(edge);
+			return unknownEpisodeNumber === undefined
+				? edge
+				: normaliseEpisode(edge, unknownEpisodeNumber);
+		});
+};
+
+const processEpisodes = async (title: Title, client: ImdbClient): Promise<Title> => {
+	if (title.titleType?.canHaveEpisodes !== true) {
+		return title;
 	}
 
-	const episodes = t.episodes?.episodes;
-
-	if (!episodes) {
-		return t;
+	const episodes = title.episodes?.episodes;
+	if (episodes?.edges === undefined) {
+		return title;
 	}
 
-	const { allEpisodes, pageInfo } = await getAllEpisodes(
-		episodes.edges,
-		episodes.pageInfo,
-		t.id,
+	const initialEpisodes = episodes.edges.filter((edge) => edge !== null);
+
+	const { allEpisodes, pageInfo } = await fetchEpisodePages(
+		{
+			allEpisodes: initialEpisodes,
+			pageInfo: episodes.pageInfo,
+		},
+		title.id,
 		client,
 	);
 
-	const normalisedEpisodes = normaliseEpisodes(allEpisodes);
+	return {
+		...title,
+		episodes: {
+			...title.episodes,
+			episodes: {
+				edges: normaliseEpisodes(allEpisodes),
+				pageInfo,
+			},
+		},
+	};
+};
 
-	return produce(t, (draft) => {
-		if (!draft.episodes?.episodes) {
-			return;
-		}
-
-		draft.episodes.episodes = {
-			edges: normalisedEpisodes,
-			pageInfo,
-		};
-	});
-}
-
-export async function getFullTitle(c: ReqContext, id: string) {
-	const client = createClient(c.settings);
-	const imdbResults = await client.query(TitleFull, { id });
-
+const getFullTitle = async (
+	context: ReadonlyDeep<ReqContext>,
+	id: string,
+): Promise<Awaited<ReturnType<typeof buildTitle>>> => {
+	const client = createClient(context.settings);
+	const imdbResults = await client.query(titleFull, { id });
 	const title = imdbResults?.title;
 
-	if (!title) {
+	if (title?.id === undefined) {
 		throw new Error(`Couldn't find IMDb ID: ${id}`);
 	}
 
 	const processedTitle = await processEpisodes(title, client);
+	return buildTitle({
+		context,
+		filterNoMatch: false,
+		matchTmdb: true,
+		title: processedTitle,
+	});
+};
 
-	return buildTitle(c, processedTitle, true, false);
-}
+export default getFullTitle;
+export type { EpisodesQueryPage, PageInfo, Title };

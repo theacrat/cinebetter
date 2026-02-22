@@ -1,17 +1,22 @@
-import type { UserSettings } from '@/lib/user-settings';
-import { decodeSettings, DEFAULT_SETTINGS } from '@/lib/user-settings';
+import type { ReadonlyDeep } from "type-fest";
 
-export interface ReqContext {
-	req: Request;
-	settings: UserSettings;
-	settingsParam?: string;
+import type { UserSettings } from "@/lib/user-settings";
+import { decodeSettings, DEFAULT_SETTINGS } from "@/lib/user-settings";
+import stripUndefined from "@/utils/strip-undefined";
+
+interface ReqContext {
+	readonly req: ReadonlyDeep<Request>;
+	readonly settings: UserSettings;
+	readonly settingsParam?: string;
 }
 
-export function buildReqContext(req: Request, settings?: string): ReqContext {
-	const userSettings = settings != null ? decodeSettings(settings) : DEFAULT_SETTINGS;
-	return {
+const buildReqContext = (req: ReadonlyDeep<Request>, settings?: string): ReqContext => {
+	const userSettings = settings === undefined ? DEFAULT_SETTINGS : decodeSettings(settings);
+	return stripUndefined<ReqContext>({
 		req,
 		settings: userSettings,
-		...(settings != null && { settingsParam: settings }),
-	};
-}
+		settingsParam: settings,
+	});
+};
+
+export { buildReqContext, type ReqContext };

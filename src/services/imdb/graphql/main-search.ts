@@ -1,7 +1,6 @@
-import type { QueryQuery } from '../../../generated/gql/graphql';
-import { graphql } from '../../../generated/gql';
+import { graphql } from "@/generated/gql";
 
-export const Query = graphql(`
+const MainSearch = graphql(`
 	query Query($search: MainSearchOptions!) {
 		mainSearch(first: 20, options: $search) {
 			edges {
@@ -47,19 +46,4 @@ export const Query = graphql(`
 	}
 `);
 
-export type MainSearchEdge = NonNullable<
-	NonNullable<QueryQuery['mainSearch']>['edges'][number]
->;
-
-export type TitleEntity = Extract<
-	MainSearchEdge['node']['entity'],
-	{ __typename?: 'Title' }
->;
-
-export function isTitleEdge(
-	edge: MainSearchEdge | null | undefined,
-): edge is NonNullable<MainSearchEdge> & {
-	node: { entity: TitleEntity };
-} {
-	return edge?.node.entity.__typename === 'Title';
-}
+export default MainSearch;

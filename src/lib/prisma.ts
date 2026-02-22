@@ -1,37 +1,43 @@
-import { PrismaD1 } from '@prisma/adapter-d1';
-import { PrismaLibSql } from '@prisma/adapter-libsql';
-import { env } from '@/env';
-import { PrismaClient } from '@/generated/prisma/client';
-import { getWorkers } from '@/utils/runtime';
+import { PrismaD1 } from "@prisma/adapter-d1";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
 
-function getD1Prisma(db: D1Database) {
+import env from "@/env";
+import { PrismaClient } from "@/generated/prisma/client";
+import getWorkers from "@/utils/runtime";
+import stripUndefined from "@/utils/strip-undefined";
+
+declare global {
+	var __cinebetterPrisma: PrismaClient | undefined;
+}
+
+const getD1Prisma = (db: Readonly<D1Database>): PrismaClient => {
 	const adapter = new PrismaD1(db);
 	return new PrismaClient({ adapter });
-}
+};
 
-function getSQLitePrisma(url: string, authToken?: string) {
-	const adapter = new PrismaLibSql({ url, ...(authToken != null && { authToken }) });
+const getSQLitePrisma = (url: string, authToken?: string): PrismaClient => {
+	const adapter = new PrismaLibSql(
+		stripUndefined<{ authToken?: string; url: string }>({
+			authToken,
+			url,
+		}),
+	);
 	return new PrismaClient({ adapter });
-}
+};
 
-export function getPrisma() {
-	let prisma: PrismaClient | undefined;
+const getPrisma = async (): Promise<PrismaClient | undefined> => {
+	const workers = await getWorkers();
+	const workersDb = workers?.env.IMDB_TMDB_D1;
+	if (workersDb) {
+		return getD1Prisma(workersDb);
+	}
 
-	return async () => {
-		const workers = await getWorkers();
-		if (workers) {
-			const { IMDB_TMDB_D1 } = workers.env;
-			return getD1Prisma(IMDB_TMDB_D1);
-		}
+	const { SQLITE_DB, SQLITE_AUTH } = env;
+	if (SQLITE_DB !== undefined) {
+		globalThis.__cinebetterPrisma ??= getSQLitePrisma(SQLITE_DB, SQLITE_AUTH);
+	}
 
-		const { SQLITE_DB, SQLITE_AUTH } = env;
-		if (SQLITE_DB != null) {
-			if (!prisma) {
-				prisma = getSQLitePrisma(SQLITE_DB, SQLITE_AUTH);
-			}
-			return prisma;
-		}
+	return globalThis.__cinebetterPrisma;
+};
 
-		return undefined;
-	};
-}
+export default getPrisma;

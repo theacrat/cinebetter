@@ -4,7 +4,7 @@ services:
     container_name: cinebetter
     restart: always
     ports:
-      - '${PORT:-3000}:${PORT:-3000}'
+      - "${PORT:-3000}:${PORT:-3000}"
     environment:
       - NODE_ENV=production
       - PORT=${PORT:-3000}

@@ -4,7 +4,7 @@ declare global {
 	}
 }
 
-export interface AppEnv {
+interface AppEnv {
 	// All environments
 	USE_CACHE?: string;
 	TMDB_TOKEN?: string;
@@ -26,4 +26,4 @@ interface DevEnv {
 	CF?: string;
 }
 
-export {};
+export type { AppEnv };

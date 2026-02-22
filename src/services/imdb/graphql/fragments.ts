@@ -1,6 +1,6 @@
-import { graphql } from '../../../generated/gql';
+import { graphql } from "@/generated/gql";
 
-export const EpisodesConnectionFragment = graphql(`
+const EpisodesConnectionFragment = graphql(`
 	fragment EpisodesConnection on EpisodeConnection {
 		edges {
 			node {
@@ -42,3 +42,5 @@ export const EpisodesConnectionFragment = graphql(`
 		}
 	}
 `);
+
+export { EpisodesConnectionFragment as default };
