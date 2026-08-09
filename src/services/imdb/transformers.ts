@@ -128,7 +128,7 @@ const buildEpisodeVideo = (titleId: string, episode: EpisodeEdge): Video | undef
 
 const buildVideos = (title: Partial<TitleIntersection>): Video[] | undefined => {
 	const { id } = title;
-	if (title.titleType?.canHaveEpisodes === true || typeof id !== "string") {
+	if (title.titleType?.canHaveEpisodes !== true || typeof id !== "string") {
 		return undefined;
 	}
 
