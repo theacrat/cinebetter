@@ -35,6 +35,7 @@ const createClient = (settings: UserSettings): ImdbClient => {
 			headers: stripUndefined<Record<string, string>>({
 				"Content-Type": "application/json",
 				"User-Agent": USER_AGENT_HEADER,
+				"x-imdb-client-name": "imdb-web-next",
 				"x-imdb-user-country": country,
 				"x-imdb-user-language": settings.languageCode,
 			}),
