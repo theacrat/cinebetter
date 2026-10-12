@@ -217,3 +217,4 @@ dist
 /src/generated
 
 *.db
+.dev.vars*
