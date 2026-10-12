@@ -1,13 +1,14 @@
+import concatBytes from "@/lib/socks/bytes";
+
 const START = 0;
 
 const encoder = new TextEncoder();
-const latin1Decoder = new TextDecoder("latin1");
 
 type Socket = ReturnType<(typeof import("cloudflare:sockets"))["connect"]>;
 
 interface Connection {
 	readonly readExactly: (length: number) => Promise<Uint8Array>;
-	readonly readToEnd: () => Promise<string>;
+	readonly readToEnd: () => Promise<Uint8Array<ArrayBuffer>>;
 	readonly release: () => void;
 	readonly write: (bytes: readonly number[] | string) => Promise<void>;
 }
@@ -37,15 +38,14 @@ const openConnection = (socket: Socket): Connection => {
 		return readExactly(length);
 	};
 
-	const readRemaining = async (chunks: readonly string[]): Promise<string> => {
+	// oxlint-disable-next-line typescript/prefer-readonly-parameter-types -- typed arrays have no readonly variant
+	const readRemaining = async (chunks: readonly Uint8Array[]): Promise<Uint8Array<ArrayBuffer>> => {
 		const { done, value } = await reader.read();
-		return done
-			? chunks.join("")
-			: readRemaining([...chunks, latin1Decoder.decode(value, { stream: true })]);
+		return done ? concatBytes(chunks) : readRemaining([...chunks, value]);
 	};
 
-	const readToEnd = async (): Promise<string> => {
-		const buffered = latin1Decoder.decode(pending, { stream: true });
+	const readToEnd = async (): Promise<Uint8Array<ArrayBuffer>> => {
+		const buffered = pending;
 		pending = new Uint8Array();
 		return readRemaining([buffered]);
 	};

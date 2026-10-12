@@ -6,7 +6,7 @@ import { parseResponse, serialiseRequest } from "@/lib/socks/http";
 import type { HttpRequest } from "@/lib/socks/http";
 
 const DEFAULT_SOCKS_PORT = 1080;
-const DEFAULT_PORT = "";
+const SCHEME_DEFAULT_PORT = "";
 const TIMEOUT_MS = 15_000;
 
 interface ProxyConfig extends ProxyCredentials {
@@ -99,7 +99,7 @@ const parseProxy = (proxyUrl: string): ProxyConfig => {
 // oxlint-disable-next-line typescript/prefer-readonly-parameter-types -- Request is a mutable platform type
 const toHttpRequest = async (request: Request): Promise<HttpRequest> => {
 	const url = new URL(request.url);
-	if (url.protocol !== "https:" || url.port !== DEFAULT_PORT) {
+	if (url.protocol !== "https:" || url.port !== SCHEME_DEFAULT_PORT) {
 		throw new Error("SOCKS fetch only supports https:// targets on port 443");
 	}
 	return {

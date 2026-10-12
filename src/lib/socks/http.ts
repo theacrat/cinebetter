@@ -1,3 +1,5 @@
+import concatBytes from "@/lib/socks/bytes";
+
 const CRLF = "\r\n";
 const HEADER_END = "\r\n\r\n";
 const HEX_RADIX = 16;
@@ -17,6 +19,9 @@ const SKIPPED_REQUEST_HEADERS = new Set([
 ]);
 
 const encoder = new TextEncoder();
+const asciiDecoder = new TextDecoder("ascii");
+const CRLF_BYTES = encoder.encode(CRLF);
+const HEADER_END_BYTES = encoder.encode(HEADER_END);
 
 interface HttpRequest {
 	readonly body: string;
@@ -27,52 +32,79 @@ interface HttpRequest {
 	readonly path: string;
 }
 
-const fromLatin1 = (text: string): Uint8Array<ArrayBuffer> =>
-	Uint8Array.from(text, (character) => character.codePointAt(START) ?? START);
+// oxlint-disable-next-line typescript/prefer-readonly-parameter-types -- typed arrays have no readonly variant
+const indexOfBytes = (haystack: Uint8Array, needle: Uint8Array, from: number): number => {
+	for (let index = from; index <= haystack.length - needle.length; index += NEXT) {
+		if (needle.every((byte, offset) => haystack[index + offset] === byte)) {
+			return index;
+		}
+	}
+	return NOT_FOUND;
+};
 
-const dechunk = (data: string): string => {
-	const chunks: string[] = [];
+// oxlint-disable-next-line typescript/prefer-readonly-parameter-types -- typed arrays have no readonly variant
+const startsWithAt = (haystack: Uint8Array, needle: Uint8Array, at: number): boolean =>
+	needle.every((byte, offset) => haystack[at + offset] === byte);
+
+// oxlint-disable-next-line typescript/prefer-readonly-parameter-types -- typed arrays have no readonly variant
+const dechunk = (data: Uint8Array<ArrayBuffer>): Uint8Array<ArrayBuffer> => {
+	const chunks: Uint8Array<ArrayBuffer>[] = [];
 	let offset = START;
 
 	for (;;) {
-		const lineEnd = data.indexOf(CRLF, offset);
-		const size = Number.parseInt(data.slice(offset, lineEnd), HEX_RADIX);
+		const lineEnd = indexOfBytes(data, CRLF_BYTES, offset);
+		const size = Number.parseInt(asciiDecoder.decode(data.subarray(offset, lineEnd)), HEX_RADIX);
 		if (lineEnd === NOT_FOUND || Number.isNaN(size)) {
 			throw new Error("Malformed chunked response from IMDb");
 		}
 		if (size === LAST_CHUNK_SIZE) {
-			return chunks.join("");
+			return concatBytes(chunks);
 		}
 
-		const chunkStart = lineEnd + CRLF.length;
+		const chunkStart = lineEnd + CRLF_BYTES.length;
 		const chunkEnd = chunkStart + size;
-		if (data.slice(chunkEnd, chunkEnd + CRLF.length) !== CRLF) {
+		if (!startsWithAt(data, CRLF_BYTES, chunkEnd)) {
 			throw new Error("Truncated chunked response from IMDb");
 		}
-		chunks.push(data.slice(chunkStart, chunkEnd));
-		offset = chunkEnd + CRLF.length;
+		chunks.push(data.subarray(chunkStart, chunkEnd));
+		offset = chunkEnd + CRLF_BYTES.length;
 	}
 };
 
-const readBody = (rest: string, headers: Readonly<Headers>): string => {
+const readBody = (
+	// oxlint-disable-next-line typescript/prefer-readonly-parameter-types -- typed arrays have no readonly variant
+	rest: Uint8Array<ArrayBuffer>,
+	headers: Readonly<Headers>,
+): Uint8Array<ArrayBuffer> => {
 	if (headers.get("transfer-encoding")?.toLowerCase().includes("chunked") === true) {
 		return dechunk(rest);
 	}
 
-	const contentLength = headers.get("content-length");
-	if (contentLength !== null && rest.length < Number(contentLength)) {
+	const contentLengthHeader = headers.get("content-length");
+	if (contentLengthHeader === null) {
+		return rest;
+	}
+
+	const contentLength = Number(contentLengthHeader);
+	if (!Number.isSafeInteger(contentLength) || contentLength < START) {
+		throw new Error("Invalid Content-Length from IMDb");
+	}
+	if (rest.length < contentLength) {
 		throw new Error("Truncated response from IMDb");
 	}
-	return contentLength === null ? rest : rest.slice(START, Number(contentLength));
+	return rest.subarray(START, contentLength);
 };
 
-const parseResponse = (raw: string): Response => {
-	const headerEnd = raw.indexOf(HEADER_END);
+// oxlint-disable-next-line typescript/prefer-readonly-parameter-types -- typed arrays have no readonly variant
+const parseResponse = (raw: Uint8Array<ArrayBuffer>): Response => {
+	const headerEnd = indexOfBytes(raw, HEADER_END_BYTES, START);
 	if (headerEnd === NOT_FOUND) {
 		throw new Error("IMDb closed the connection before sending headers");
 	}
 
-	const [statusLine = "", ...headerLines] = raw.slice(START, headerEnd).split(CRLF);
+	const [statusLine = "", ...headerLines] = asciiDecoder
+		.decode(raw.subarray(START, headerEnd))
+		.split(CRLF);
 	const status = Number(statusLine.split(" ")[HTTP_STATUS_PART]);
 	const headers = new Headers(
 		headerLines.map((line): [string, string] => {
@@ -81,13 +113,13 @@ const parseResponse = (raw: string): Response => {
 		}),
 	);
 
-	const body = readBody(raw.slice(headerEnd + HEADER_END.length), headers);
+	const body = readBody(raw.subarray(headerEnd + HEADER_END_BYTES.length), headers);
 	headers.delete("transfer-encoding");
 	headers.delete("content-length");
 
 	return NO_BODY_STATUSES.has(status)
 		? new Response(undefined, { headers, status })
-		: new Response(fromLatin1(body), { headers, status });
+		: new Response(body, { headers, status });
 };
 
 const serialiseRequest = (request: HttpRequest): string =>
