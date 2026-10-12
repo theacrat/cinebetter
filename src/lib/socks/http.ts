@@ -19,7 +19,7 @@ const SKIPPED_REQUEST_HEADERS = new Set([
 ]);
 
 const encoder = new TextEncoder();
-const asciiDecoder = new TextDecoder("ascii");
+const headerDecoder = new TextDecoder();
 const CRLF_BYTES = encoder.encode(CRLF);
 const HEADER_END_BYTES = encoder.encode(HEADER_END);
 
@@ -53,7 +53,7 @@ const dechunk = (data: Uint8Array<ArrayBuffer>): Uint8Array<ArrayBuffer> => {
 
 	for (;;) {
 		const lineEnd = indexOfBytes(data, CRLF_BYTES, offset);
-		const size = Number.parseInt(asciiDecoder.decode(data.subarray(offset, lineEnd)), HEX_RADIX);
+		const size = Number.parseInt(headerDecoder.decode(data.subarray(offset, lineEnd)), HEX_RADIX);
 		if (lineEnd === NOT_FOUND || Number.isNaN(size)) {
 			throw new Error("Malformed chunked response from IMDb");
 		}
@@ -85,10 +85,10 @@ const readBody = (
 		return rest;
 	}
 
-	const contentLength = Number(contentLengthHeader);
-	if (!Number.isSafeInteger(contentLength) || contentLength < START) {
+	if (!/^\d+$/u.test(contentLengthHeader)) {
 		throw new Error("Invalid Content-Length from IMDb");
 	}
+	const contentLength = Number(contentLengthHeader);
 	if (rest.length < contentLength) {
 		throw new Error("Truncated response from IMDb");
 	}
@@ -102,7 +102,7 @@ const parseResponse = (raw: Uint8Array<ArrayBuffer>): Response => {
 		throw new Error("IMDb closed the connection before sending headers");
 	}
 
-	const [statusLine = "", ...headerLines] = asciiDecoder
+	const [statusLine = "", ...headerLines] = headerDecoder
 		.decode(raw.subarray(START, headerEnd))
 		.split(CRLF);
 	const status = Number(statusLine.split(" ")[HTTP_STATUS_PART]);
