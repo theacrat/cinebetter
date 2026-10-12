@@ -58,7 +58,9 @@ const handle = async (request: Request): Promise<Response> => {
 			headers: { "content-type": upstream.headers.get("content-type") ?? "application/json" },
 			status: upstream.status,
 		});
-	} catch {
+	} catch (error) {
+		// oxlint-disable-next-line no-console -- the proxy has no other way to report upstream failures to its operator
+		console.warn("IMDb upstream request failed:", error);
 		return new Response("Bad Gateway", { status: BAD_GATEWAY_STATUS });
 	}
 };
