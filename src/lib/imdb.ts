@@ -15,11 +15,18 @@ interface ImdbClient {
 	) => Promise<Data | undefined>;
 }
 
+const getStatus = (response: unknown): number | string =>
+	response instanceof Response ? response.status : "no response";
+
 const handleCombinedError = (error: ReadonlyDeep<CombinedError>): never => {
 	if (error.networkError) {
-		throw new Error("Network error while connecting to the IMDb API", {
-			cause: error,
-		});
+		const status = getStatus(error.response);
+		throw new Error(
+			`Network error while connecting to the IMDb API (${status}): ${error.networkError.message}`,
+			{
+				cause: error,
+			},
+		);
 	}
 
 	throw new Error("GraphQL query error", {
