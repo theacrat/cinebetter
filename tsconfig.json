@@ -17,5 +17,5 @@
 		"lib": ["ESNext", "DOM", "DOM.Iterable"],
 		"types": ["vite/client", "./worker-configuration.d.ts"]
 	},
-	"include": ["./src/**/*", "./*.ts"]
+	"include": ["./src/**/*", "./proxy/**/*", "./*.ts"]
 }

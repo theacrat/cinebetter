@@ -37,6 +37,7 @@
 		"prepare": "husky",
 		"preview": "vite preview",
 		"preview:cf": "bun vite:cf preview",
+		"proxy": "bun proxy/imdb-proxy.ts",
 		"test": "vitest run",
 		"vite:cf": "CF=true vite"
 	},

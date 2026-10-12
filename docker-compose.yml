@@ -9,6 +9,8 @@ services:
       - NODE_ENV=production
       - PORT=${PORT:-3000}
       - TMDB_TOKEN=${TMDB_TOKEN:?error}
+      - IMDB_PROXY_URL=${IMDB_PROXY_URL}
+      - IMDB_PROXY_TOKEN=${IMDB_PROXY_TOKEN}
       - SQLITE_DB=${SQLITE_DB}
       - SQLITE_AUTH=${SQLITE_AUTH}
       - VALKEY_HOST=valkey
