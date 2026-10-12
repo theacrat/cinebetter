@@ -15,14 +15,25 @@ interface ImdbClient {
 	) => Promise<Data | undefined>;
 }
 
-const getStatus = (response: unknown): number | string =>
-	response instanceof Response ? response.status : "no response";
+const ERROR_BODY_START = 0;
+const ERROR_BODY_END = 300;
+
+// oxlint-disable-next-line typescript/prefer-readonly-parameter-types -- passed straight through to fetch, whose Request/RequestInit types can't be deeply readonly
+const fetchOrThrow = async (...args: Parameters<typeof fetch>): Promise<Response> => {
+	const response = await fetch(...args);
+
+	if (!response.ok) {
+		const body = await response.text();
+		throw new Error(`HTTP ${response.status}: ${body.slice(ERROR_BODY_START, ERROR_BODY_END)}`);
+	}
+
+	return response;
+};
 
 const handleCombinedError = (error: ReadonlyDeep<CombinedError>): never => {
 	if (error.networkError) {
-		const status = getStatus(error.response);
 		throw new Error(
-			`Network error while connecting to the IMDb API (${status}): ${error.networkError.message}`,
+			`Network error while connecting to the IMDb API: ${error.networkError.message}`,
 			{
 				cause: error,
 			},
@@ -38,6 +49,7 @@ const createClient = (settings: UserSettings): ImdbClient => {
 	const [, country] = settings.languageCode.split("-");
 	const client = new Client({
 		exchanges: [cacheExchange, fetchExchange],
+		fetch: fetchOrThrow,
 		fetchOptions: (): { headers: Record<string, string> } => ({
 			headers: stripUndefined<Record<string, string>>({
 				"Content-Type": "application/json",
