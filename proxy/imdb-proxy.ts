@@ -40,7 +40,7 @@ const pickHeaders = (source: Readonly<Headers>): Headers => {
 // oxlint-disable-next-line typescript/prefer-readonly-parameter-types -- Bun hands us a mutable Request and we only read from it
 const handle = async (request: Request): Promise<Response> => {
 	if (!isAuthorised(request.headers.get(PROXY_TOKEN_HEADER))) {
-		return new Response("Forbidden", { status: FORBIDDEN_STATUS });
+		return new Response("Invalid proxy token", { status: FORBIDDEN_STATUS });
 	}
 
 	if (request.method !== "POST") {
