@@ -8,6 +8,8 @@ interface AppEnv {
 	// All environments
 	USE_CACHE?: string;
 	TMDB_TOKEN?: string;
+	IMDB_PROXY_URL?: string;
+	IMDB_PROXY_TOKEN?: string;
 
 	// Bun only
 	SQLITE_DB?: string;

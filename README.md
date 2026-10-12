@@ -108,6 +108,21 @@ bun run build:cf
 bun wrangler deploy
 ```
 
+### IMDb proxy fallback
+
+IMDb sometimes rejects requests from Cloudflare's shared egress IPs. If a direct request fails, Cinebetter retries through `IMDB_PROXY_URL` when it's set. Run the proxy on any host outside Cloudflare:
+
+```bash
+IMDB_PROXY_TOKEN="<random secret>" bun proxy
+```
+
+Then point the Worker at it:
+
+```bash
+bun wrangler secret put IMDB_PROXY_URL
+bun wrangler secret put IMDB_PROXY_TOKEN
+```
+
 ## Database Schema
 
 ### ImdbTmdb

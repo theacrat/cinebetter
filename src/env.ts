@@ -15,6 +15,8 @@ export const env = createEnv({
 	server: {
 		CACHE_DAYS_CATALOG: z.coerce.number().default(DEFAULT_CACHE_DAYS_CATALOG),
 		CACHE_DAYS_META: z.coerce.number().default(DEFAULT_CACHE_DAYS_META),
+		IMDB_PROXY_TOKEN: z.string().optional(),
+		IMDB_PROXY_URL: z.url().optional(),
 		SQLITE_AUTH: z.string().optional(),
 		SQLITE_DB: z.string().optional(),
 		TMDB_TOKEN: z.string().optional(),
