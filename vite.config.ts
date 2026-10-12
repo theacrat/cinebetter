@@ -27,7 +27,7 @@ const config = defineConfig(() => {
 		"@": fileURLToPath(new URL("src", import.meta.url)),
 		...(cf
 			? { "@valkey/valkey-glide": unavailableShim }
-			: { "cloudflare:workers": unavailableShim }),
+			: { "cloudflare:sockets": unavailableShim, "cloudflare:workers": unavailableShim }),
 	};
 
 	const external: ExternalOption =

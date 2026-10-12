@@ -110,13 +110,28 @@ bun wrangler deploy
 
 ### IMDb proxy
 
-IMDb sometimes rejects requests from Cloudflare's shared egress IPs. When `IMDB_PROXY_URL` is set, every IMDb request goes through it instead. Run the proxy on any host outside Cloudflare (it listens on `IMDB_PROXY_PORT`, default `41873`):
+IMDb sometimes rejects requests from Cloudflare's shared egress IPs. When `IMDB_PROXY_URL` is set, every IMDb request goes through it instead. It accepts two kinds of proxy.
+
+#### SOCKS5 (Cloudflare Workers only)
+
+Any SOCKS5 proxy with username/password auth works, for example NordVPN's (use your [service credentials](https://my.nordaccount.com/dashboard/nordvpn/manual-configuration/service-credentials/), not your login, and URL-encode them):
+
+```bash
+# socks5://<username>:<password>@us.socks.nordhold.net:1080
+bun wrangler secret put IMDB_PROXY_URL
+```
+
+For local `bun dev:cf`, put the same value in `.dev.vars`.
+
+#### HTTPS (`proxy/imdb-proxy.ts`)
+
+Run the bundled proxy on any host outside Cloudflare (it listens on `IMDB_PROXY_PORT`, default `41873`):
 
 ```bash
 IMDB_PROXY_TOKEN="<random secret>" bun proxy
 ```
 
-Put it behind a TLS-terminating reverse proxy on a domain, since `IMDB_PROXY_URL` must be `https://` and the token is sent as a header. Then point the Worker at it:
+Put it behind a TLS-terminating reverse proxy on a domain, since the token is sent as a header. Then point the Worker at it:
 
 ```bash
 bun wrangler secret put IMDB_PROXY_URL

@@ -18,7 +18,7 @@ export const env = createEnv({
 		IMDB_PROXY_TOKEN: z.string().optional(),
 		IMDB_PROXY_URL: z.preprocess(
 			(value) => (value === "" ? undefined : value),
-			z.url({ protocol: /^https$/u }).optional(),
+			z.url({ protocol: /^(?:https|socks5)$/u }).optional(),
 		),
 		SQLITE_AUTH: z.string().optional(),
 		SQLITE_DB: z.string().optional(),

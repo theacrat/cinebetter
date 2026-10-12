@@ -4,6 +4,7 @@ import stripUndefined from "strip-undefined";
 import type { ReadonlyDeep } from "type-fest";
 
 import env from "@/env";
+import createSocksFetch from "@/lib/socks";
 import type { UserSettings } from "@/lib/user-settings";
 
 const PROXY_TOKEN_HEADER = "x-proxy-token";
@@ -23,10 +24,10 @@ const ERROR_DETAIL_MAX_LENGTH = 300;
 const summariseErrorDetail = (detail: string): string =>
 	detail.replaceAll(/\s+/gu, " ").slice(ERROR_DETAIL_START, ERROR_DETAIL_MAX_LENGTH);
 
-// oxlint-disable-next-line typescript/prefer-readonly-parameter-types -- passed straight through to fetch, whose Request/RequestInit types can't be deeply readonly
-const fetchOrThrow = async (...args: Parameters<typeof fetch>): Promise<Response> => {
-	const response = await fetch(...args);
+const SOCKS_PROTOCOL = "socks5:";
 
+// oxlint-disable-next-line typescript/prefer-readonly-parameter-types -- Response is a mutable platform type
+const throwIfNotOk = async (response: Response): Promise<Response> => {
 	if (!response.ok) {
 		const body = await response.text().catch(() => "");
 		throw new Error(`HTTP ${response.status}: ${body}`);
@@ -35,21 +36,29 @@ const fetchOrThrow = async (...args: Parameters<typeof fetch>): Promise<Response
 	return response;
 };
 
-// oxlint-disable-next-line typescript/prefer-readonly-parameter-types -- passed straight through to fetch, whose Request/RequestInit types can't be deeply readonly
-const fetchViaProxyIfSet = async (...args: Parameters<typeof fetch>): Promise<Response> => {
-	const [input, init] = args;
-	const { IMDB_PROXY_TOKEN: proxyToken, IMDB_PROXY_URL: proxyUrl } = env;
+const createHttpProxyFetch =
+	(proxyUrl: string): typeof fetch =>
+	// oxlint-disable-next-line typescript/prefer-readonly-parameter-types -- matches fetch's signature, whose Request/RequestInit types can't be deeply readonly
+	async (_input, init) => {
+		const headers = new Headers(init?.headers);
+		if (env.IMDB_PROXY_TOKEN !== undefined) {
+			headers.set(PROXY_TOKEN_HEADER, env.IMDB_PROXY_TOKEN);
+		}
 
-	if (proxyUrl === undefined) {
-		return fetchOrThrow(input, init);
-	}
+		return fetch(proxyUrl, { ...init, headers });
+	};
 
-	const headers = new Headers(init?.headers);
-	if (proxyToken !== undefined) {
-		headers.set(PROXY_TOKEN_HEADER, proxyToken);
-	}
+const getProxyFetch = (proxyUrl: string): typeof fetch =>
+	new URL(proxyUrl).protocol === SOCKS_PROTOCOL
+		? createSocksFetch(proxyUrl)
+		: createHttpProxyFetch(proxyUrl);
 
-	return fetchOrThrow(proxyUrl, { ...init, headers });
+const createImdbFetch = (): typeof fetch => {
+	const proxyUrl = env.IMDB_PROXY_URL;
+	const proxyFetch = proxyUrl === undefined ? fetch : getProxyFetch(proxyUrl);
+
+	// oxlint-disable-next-line typescript/prefer-readonly-parameter-types -- matches fetch's signature, whose Request/RequestInit types can't be deeply readonly
+	return async (...args) => throwIfNotOk(await proxyFetch(...args));
 };
 
 const handleCombinedError = (error: ReadonlyDeep<CombinedError>): never => {
@@ -71,7 +80,7 @@ const createClient = (settings: UserSettings): ImdbClient => {
 	const [, country] = settings.languageCode.split("-");
 	const client = new Client({
 		exchanges: [cacheExchange, fetchExchange],
-		fetch: fetchViaProxyIfSet,
+		fetch: createImdbFetch(),
 		fetchOptions: (): { headers: Record<string, string> } => ({
 			headers: stripUndefined<Record<string, string>>({
 				"Content-Type": "application/json",
