@@ -53,12 +53,12 @@ const getProxyFetch = (proxyUrl: string): typeof fetch =>
 		? createSocksFetch(proxyUrl)
 		: createHttpProxyFetch(proxyUrl);
 
-// oxlint-disable-next-line typescript/prefer-readonly-parameter-types -- passed straight through to fetch, whose Request/RequestInit types can't be deeply readonly
-const fetchViaProxyIfSet = async (...args: Parameters<typeof fetch>): Promise<Response> => {
+const createImdbFetch = (): typeof fetch => {
 	const proxyUrl = env.IMDB_PROXY_URL;
 	const proxyFetch = proxyUrl === undefined ? fetch : getProxyFetch(proxyUrl);
 
-	return throwIfNotOk(await proxyFetch(...args));
+	// oxlint-disable-next-line typescript/prefer-readonly-parameter-types -- matches fetch's signature, whose Request/RequestInit types can't be deeply readonly
+	return async (...args) => throwIfNotOk(await proxyFetch(...args));
 };
 
 const handleCombinedError = (error: ReadonlyDeep<CombinedError>): never => {
@@ -80,7 +80,7 @@ const createClient = (settings: UserSettings): ImdbClient => {
 	const [, country] = settings.languageCode.split("-");
 	const client = new Client({
 		exchanges: [cacheExchange, fetchExchange],
-		fetch: fetchViaProxyIfSet,
+		fetch: createImdbFetch(),
 		fetchOptions: (): { headers: Record<string, string> } => ({
 			headers: stripUndefined<Record<string, string>>({
 				"Content-Type": "application/json",
