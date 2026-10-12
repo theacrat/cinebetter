@@ -46,12 +46,14 @@ const fetchWithProxyFallback = async (...args: Parameters<typeof fetch>): Promis
 	try {
 		return await fetchOrThrow(input, init);
 	} catch (directError) {
-		if (proxyUrl === undefined) {
+		if (proxyUrl === undefined || init?.signal?.aborted === true) {
 			throw directError;
 		}
 
 		// oxlint-disable-next-line no-console -- surfaces how often direct IMDb requests fail, since the fallback otherwise hides it
-		console.warn(`Direct IMDb request failed, retrying via proxy: ${getErrorMessage(directError)}`);
+		console.warn(
+			`Direct IMDb request failed, retrying via proxy: ${summariseErrorDetail(getErrorMessage(directError))}`,
+		);
 
 		const headers = new Headers(init?.headers);
 		if (proxyToken !== undefined) {
